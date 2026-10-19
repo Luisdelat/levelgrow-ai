@@ -97,6 +97,9 @@ export default function Onboarding() {
       });
 
       if (response.ok) {
+        // Mark GENOMA setup as done
+        localStorage.setItem('genoma-setup-done', 'true');
+        // Redirect to chat where AI will help with marketing
         router.push('/dashboard/chat');
       } else {
         alert('Error al guardar GENOMA');

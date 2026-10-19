@@ -56,9 +56,9 @@ export default function Register() {
         return;
       }
 
-      // Store token and redirect to dashboard
+      // Store token and redirect to GENOMA onboarding
       localStorage.setItem('token', data.token);
-      router.push('/dashboard');
+      router.push('/dashboard/onboarding');
     } catch (err) {
       setError('Error de conexión. Intenta de nuevo.');
     } finally {

@@ -20,6 +20,17 @@ export default function Dashboard() {
     fetchUserData(token);
   }, [router]);
 
+  // Auto-redirect to GENOMA if user doesn't have one
+  useEffect(() => {
+    if (user && !user.profile?.genoma) {
+      // Check if user just registered (no GENOMA yet)
+      const hasGenomaSetupDone = localStorage.getItem('genoma-setup-done');
+      if (!hasGenomaSetupDone) {
+        router.push('/dashboard/onboarding');
+      }
+    }
+  }, [user, router]);
+
   const fetchUserData = async (token: string) => {
     try {
       const response = await fetch('/api/user', {
