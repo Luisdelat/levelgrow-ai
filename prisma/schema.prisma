@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String     @id @default(cuid())
+  email               String     @unique
+  passwordHash        String
+  plan                String     @default("basic") // "basic" or "full"
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  // Relations
+  profile             Profile?
+  subscription        Subscription?
+  chatSessions        ChatSession[]
+  genomas             Genoma[]
+
+  @@index([email])
+}
+
+model Profile {
+  id                  String     @id @default(cuid())
+  userId              String     @unique
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // GENOMA data
+  genoma              Json?      // Stores complete GENOMA data
+  businessName        String?
+  businessType        String?
+  businessStage       String?
+  targetAudience      String?
+  mainProblem         String?
+  mainObjective       String?
+
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+}
+
+model Subscription {
+  id                  String     @id @default(cuid())
+  userId              String     @unique
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  plan                String     // "basic" or "full"
+  status              String     @default("active") // "active", "cancelled", "pending"
+  paypalSubscriptionId String?   @unique
+  paypalPlanId        String?
+
+  currentPeriodStart  DateTime?
+  currentPeriodEnd    DateTime?
+  cancelledAt         DateTime?
+
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  @@index([userId])
+  @@index([paypalSubscriptionId])
+}
+
+model ChatSession {
+  id                  String     @id @default(cuid())
+  userId              String
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title               String     @default("New Chat")
+  messages            ChatMessage[]
+
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model ChatMessage {
+  id                  String     @id @default(cuid())
+  sessionId           String
+  session             ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  role                String     // "user" or "assistant"
+  content             String     @db.Text
+
+  createdAt           DateTime   @default(now())
+}
+
+model Genoma {
+  id                  String     @id @default(cuid())
+  userId              String
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  data                Json       // Complete GENOMA data structure
+  status              String     @default("draft") // "draft", "completed"
+
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  @@index([userId])
+}
