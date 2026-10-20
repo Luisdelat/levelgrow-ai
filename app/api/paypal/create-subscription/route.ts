@@ -3,8 +3,6 @@ import axios from 'axios';
 import { getTokenFromRequest, verifyToken } from '@/lib/auth';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
-
 const PAYPAL_API_URL = 'https://api.sandbox.paypal.com'; // Change to live for production
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 const PAYPAL_SECRET = process.env.PAYPAL_SECRET;
@@ -28,6 +26,7 @@ async function getPayPalAccessToken(): Promise<string> {
 }
 
 export async function POST(request: NextRequest) {
+  const prisma = new PrismaClient();
   try {
     const token = getTokenFromRequest(request);
 

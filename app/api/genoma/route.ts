@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTokenFromRequest, verifyToken } from '@/lib/auth';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
-
 export async function POST(request: NextRequest) {
+  const prisma = new PrismaClient();
   try {
     const token = getTokenFromRequest(request);
 
@@ -72,6 +71,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  const prisma = new PrismaClient();
   try {
     const token = getTokenFromRequest(request);
 

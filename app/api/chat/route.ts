@@ -3,9 +3,6 @@ import { getTokenFromRequest, verifyToken } from '@/lib/auth';
 import { PrismaClient } from '@prisma/client';
 import Anthropic from '@anthropic-ai/sdk';
 
-const prisma = new PrismaClient();
-const client = new Anthropic();
-
 const SYSTEM_PROMPT = `Eres un asistente de marketing experto basado en la metodología HAZTUAGENCIA (HTA).
 
 TU ROL PRINCIPAL:
@@ -34,6 +31,8 @@ CUANDO RESPONDA:
 4. Sé su mentor de marketing, no solo un chatbot`;
 
 export async function POST(request: NextRequest) {
+  const prisma = new PrismaClient();
+  const client = new Anthropic();
   try {
     const token = getTokenFromRequest(request);
 
@@ -108,7 +107,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Build conversation history for Claude
-    const conversationHistory = session.messages.map(msg => ({
+    const conversationHistory = session.messages.map((msg: any) => ({
       role: msg.role as 'user' | 'assistant',
       content: msg.content,
     }));
@@ -163,6 +162,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  const prisma = new PrismaClient();
   try {
     const token = getTokenFromRequest(request);
 
