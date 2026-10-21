@@ -228,11 +228,11 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white overflow-hidden relative">
       <style>{`
         @keyframes float-watermark {
-          0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.03; }
-          50% { transform: translateY(-20px) rotate(2deg); opacity: 0.05; }
+          0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.12; }
+          50% { transform: translateY(-25px) rotate(3deg); opacity: 0.18; }
         }
         
         @keyframes glow-pulse {
@@ -245,21 +245,17 @@ export default function Home() {
           to { opacity: 1; transform: translateY(0); }
         }
         
-        @keyframes fade-in-scale {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        
         .watermark-logo {
           position: fixed;
-          top: 50%;
+          top: 35%;
           left: 50%;
           transform: translate(-50%, -50%);
-          width: 400px;
-          height: 400px;
-          animation: float-watermark 6s ease-in-out infinite;
+          width: 550px;
+          height: 550px;
+          animation: float-watermark 8s ease-in-out infinite;
           pointer-events: none;
-          z-index: 0;
+          z-index: 1;
+          filter: drop-shadow(0 0 40px rgba(59, 130, 246, 0.15));
         }
         
         .content-wrapper {
@@ -280,22 +276,30 @@ export default function Home() {
         .stagger-3 { animation-delay: 0.3s; }
       `}</style>
 
-      {/* Watermark Logo */}
+      {/* Watermark Logo - MORE VISIBLE */}
       <div className="watermark-logo">
         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style={{ stopColor: '#3b82f6', stopOpacity: 0.5 }} />
-              <stop offset="100%" style={{ stopColor: '#8b5cf6', stopOpacity: 0.5 }} />
+              <stop offset="0%" style={{ stopColor: '#3b82f6', stopOpacity: 0.8 }} />
+              <stop offset="100%" style={{ stopColor: '#8b5cf6', stopOpacity: 0.7 }} />
+            </linearGradient>
+            <linearGradient id="grad2" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" style={{ stopColor: '#06b6d4', stopOpacity: 0.7 }} />
+              <stop offset="100%" style={{ stopColor: '#3b82f6', stopOpacity: 0.8 }} />
             </linearGradient>
           </defs>
-          <circle cx="100" cy="100" r="95" fill="none" stroke="url(#grad1)" strokeWidth="1" />
+          <circle cx="100" cy="100" r="95" fill="none" stroke="url(#grad1)" strokeWidth="2" opacity="0.4"/>
           <g transform="translate(100, 100)">
-            <path d="M -45 30 Q -20 -20 20 -35 Q 45 -40 50 -20" fill="none" stroke="url(#grad1)" strokeWidth="3" strokeLinecap="round" />
-            <circle cx="-45" cy="30" r="6" fill="url(#grad1)" />
-            <circle cx="-15" cy="-8" r="7" fill="url(#grad1)" />
-            <circle cx="25" cy="-30" r="7.5" fill="url(#grad1)" />
-            <circle cx="50" cy="-20" r="6" fill="url(#grad1)" />
+            <path d="M -45 30 Q -20 -20 20 -35 Q 45 -40 50 -20" fill="none" stroke="url(#grad1)" strokeWidth="4" strokeLinecap="round" />
+            <circle cx="-45" cy="30" r="8" fill="url(#grad1)" opacity="0.8"/>
+            <circle cx="-15" cy="-8" r="9" fill="url(#grad2)" opacity="0.8"/>
+            <circle cx="25" cy="-30" r="10" fill="url(#grad1)" opacity="0.8"/>
+            <circle cx="50" cy="-20" r="8" fill="url(#grad2)" opacity="0.8"/>
+            <line x1="-45" y1="30" x2="-15" y2="-8" stroke="url(#grad1)" strokeWidth="2" opacity="0.5"/>
+            <line x1="-15" y1="-8" x2="25" y2="-30" stroke="url(#grad2)" strokeWidth="2" opacity="0.5"/>
+            <line x1="25" y1="-30" x2="50" y2="-20" stroke="url(#grad1)" strokeWidth="2" opacity="0.5"/>
+            <path d="M 60 0 L 75 -15 L 75 5" fill="none" stroke="url(#grad1)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.8"/>
           </g>
         </svg>
       </div>
