@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Client } from 'pg';
+import { PrismaClient } from '@prisma/client';
 
 export const runtime = 'nodejs';
 
@@ -15,34 +15,26 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-  });
+  const prisma = new PrismaClient();
 
   try {
     console.log('Starting database initialization...');
-    await client.connect();
+    // Test connection
+    await prisma.$executeRawUnsafe('SELECT 1');
 
-    // Create Users table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS "User" (
+    // Create all tables using Prisma executeRawUnsafe
+    const tables = [
+      `CREATE TABLE IF NOT EXISTS "User" (
         "id" TEXT NOT NULL PRIMARY KEY,
         "email" TEXT NOT NULL UNIQUE,
         "passwordHash" TEXT NOT NULL,
         "plan" TEXT NOT NULL DEFAULT 'basic',
         "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
         "updatedAt" TIMESTAMP NOT NULL DEFAULT NOW()
-      )
-    `);
-    console.log('✓ User table created');
+      )`,
+      `CREATE INDEX IF NOT EXISTS "User_email_idx" ON "User"("email")`,
 
-    // Create index
-    await client.query(`CREATE INDEX IF NOT EXISTS "User_email_idx" ON "User"("email")`);
-    console.log('✓ User email index created');
-
-    // Create Profile table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS "Profile" (
+      `CREATE TABLE IF NOT EXISTS "Profile" (
         "id" TEXT NOT NULL PRIMARY KEY,
         "userId" TEXT NOT NULL UNIQUE,
         "genoma" JSONB,
@@ -55,13 +47,9 @@ export async function POST(request: NextRequest) {
         "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
         "updatedAt" TIMESTAMP NOT NULL DEFAULT NOW(),
         FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE
-      )
-    `);
-    console.log('✓ Profile table created');
+      )`,
 
-    // Create Subscription table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS "Subscription" (
+      `CREATE TABLE IF NOT EXISTS "Subscription" (
         "id" TEXT NOT NULL PRIMARY KEY,
         "userId" TEXT NOT NULL UNIQUE,
         "plan" TEXT NOT NULL,
@@ -74,48 +62,32 @@ export async function POST(request: NextRequest) {
         "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
         "updatedAt" TIMESTAMP NOT NULL DEFAULT NOW(),
         FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE
-      )
-    `);
-    console.log('✓ Subscription table created');
+      )`,
 
-    // Create indexes
-    await client.query(`CREATE INDEX IF NOT EXISTS "Subscription_userId_idx" ON "Subscription"("userId")`);
-    await client.query(`CREATE INDEX IF NOT EXISTS "Subscription_paypalSubscriptionId_idx" ON "Subscription"("paypalSubscriptionId")`);
-    console.log('✓ Subscription indexes created');
+      `CREATE INDEX IF NOT EXISTS "Subscription_userId_idx" ON "Subscription"("userId")`,
+      `CREATE INDEX IF NOT EXISTS "Subscription_paypalSubscriptionId_idx" ON "Subscription"("paypalSubscriptionId")`,
 
-    // Create ChatSession table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS "ChatSession" (
+      `CREATE TABLE IF NOT EXISTS "ChatSession" (
         "id" TEXT NOT NULL PRIMARY KEY,
         "userId" TEXT NOT NULL,
         "title" TEXT NOT NULL DEFAULT 'New Chat',
         "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
         "updatedAt" TIMESTAMP NOT NULL DEFAULT NOW(),
         FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE
-      )
-    `);
-    console.log('✓ ChatSession table created');
+      )`,
 
-    // Create index
-    await client.query(`CREATE INDEX IF NOT EXISTS "ChatSession_userId_idx" ON "ChatSession"("userId")`);
-    console.log('✓ ChatSession index created');
+      `CREATE INDEX IF NOT EXISTS "ChatSession_userId_idx" ON "ChatSession"("userId")`,
 
-    // Create ChatMessage table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS "ChatMessage" (
+      `CREATE TABLE IF NOT EXISTS "ChatMessage" (
         "id" TEXT NOT NULL PRIMARY KEY,
         "sessionId" TEXT NOT NULL,
         "role" TEXT NOT NULL,
         "content" TEXT NOT NULL,
         "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
         FOREIGN KEY ("sessionId") REFERENCES "ChatSession"("id") ON DELETE CASCADE
-      )
-    `);
-    console.log('✓ ChatMessage table created');
+      )`,
 
-    // Create Genoma table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS "Genoma" (
+      `CREATE TABLE IF NOT EXISTS "Genoma" (
         "id" TEXT NOT NULL PRIMARY KEY,
         "userId" TEXT NOT NULL,
         "data" JSONB NOT NULL,
@@ -123,13 +95,23 @@ export async function POST(request: NextRequest) {
         "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
         "updatedAt" TIMESTAMP NOT NULL DEFAULT NOW(),
         FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE
-      )
-    `);
-    console.log('✓ Genoma table created');
+      )`,
 
-    // Create index
-    await client.query(`CREATE INDEX IF NOT EXISTS "Genoma_userId_idx" ON "Genoma"("userId")`);
-    console.log('✓ Genoma index created');
+      `CREATE INDEX IF NOT EXISTS "Genoma_userId_idx" ON "Genoma"("userId")`
+    ];
+
+    for (const sql of tables) {
+      try {
+        await prisma.$executeRawUnsafe(sql);
+        console.log(`✓ Executed: ${sql.substring(0, 50)}...`);
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('already exists')) {
+          console.log(`⚠ Already exists: ${sql.substring(0, 50)}...`);
+        } else {
+          throw error;
+        }
+      }
+    }
 
     return NextResponse.json(
       {
@@ -157,6 +139,6 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   } finally {
-    await client.end();
+    await prisma.$disconnect();
   }
 }
