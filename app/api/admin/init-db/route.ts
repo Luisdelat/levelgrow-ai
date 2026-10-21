@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Client } from 'pg';
 
-const { Client } = require('pg');
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   // Security: verify admin token
