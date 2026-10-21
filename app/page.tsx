@@ -29,9 +29,6 @@ export default function Home() {
           <h1 className="text-5xl sm:text-6xl font-bold mb-4">
             Tu Asistente de Marketing IA
           </h1>
-          <p className="text-xl text-gray-400 mb-8">
-            Basado en la metodología HAZTUAGENCIA. Automatiza tu marketing y crece sin límites.
-          </p>
           <div className="flex gap-4 justify-center">
             <Link href="/auth/register" className="btn-primary px-8 py-3 text-lg">
               Comenzar Gratis
