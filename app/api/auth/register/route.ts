@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { hashPassword, generateToken } from '@/lib/auth';
 import { PrismaClient } from '@prisma/client';
 
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   const prisma = new PrismaClient();
   try {
