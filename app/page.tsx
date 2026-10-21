@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Logo from '@/components/Logo';
 import { useState } from 'react';
 
 export default function Home() {
@@ -11,7 +12,7 @@ export default function Home() {
       {/* Navigation */}
       <nav className="border-b border-gray-800 bg-gray-950/50 backdrop-blur">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-blue-500">LEVELGROW AI</div>
+          <Logo size="md" showText={true} />
           <div className="flex gap-4">
             <Link href="/auth/login" className="btn-secondary">
               Ingresar
