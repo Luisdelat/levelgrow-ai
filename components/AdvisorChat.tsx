@@ -73,6 +73,10 @@ export default function AdvisorChat({ channel, onUserMessageCount, className = '
         if (res.status === 402) {
           // Monthly message limit reached: the message was not saved.
           const data = await res.json().catch(() => ({}));
+          if (data.error === 'payment_required') {
+            window.location.href = '/checkout';
+            return;
+          }
           setMessages((prev) => prev.filter((m) => m.id !== replyId && m.id !== userMsgId));
           if (text) setInput(text);
           setLimitInfo({ plan: data.plan ?? 'basic', limit: data.limit ?? 0 });
@@ -227,6 +231,11 @@ export default function AdvisorChat({ channel, onUserMessageCount, className = '
         {limitInfo && (
           <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-sm text-blue-100">
             {fill(limitInfo.plan === 'full' ? T.limitFull : T.limitBasic, { limit: limitInfo.limit })}
+            {limitInfo.plan !== 'full' && (
+              <a href="/checkout?plan=full" className="ml-2 font-semibold text-white underline">
+                {T.upgradeCta}
+              </a>
+            )}
           </div>
         )}
 

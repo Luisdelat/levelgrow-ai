@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/prisma';
-import { getUsage, getUserId, loadLatestGenoma, loadProgress } from '@/lib/route-progress';
+import { requireAccess } from '@/lib/subscription';
+import { getUsage, loadLatestGenoma, loadProgress } from '@/lib/route-progress';
 import { buildSystemPrompt, CONTENT_CALENDAR_BRIEF } from '@/lib/advisor-prompts';
 import { streamClaude } from '@/lib/claude-stream';
 import { FREE_CHAT_ID } from '@/lib/stages';
@@ -31,8 +32,9 @@ async function loadCalendar(userId: string) {
 
 /** GET → this month's latest calendar and how many generations are left. */
 export async function GET(request: NextRequest) {
-  const userId = getUserId(request);
-  if (!userId) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  const auth = await requireAccess(request);
+  if (auth.error) return auth.error;
+  const userId = auth.userId;
   try {
     const { used, content } = await loadCalendar(userId);
     return NextResponse.json({ month: monthKey(), used, limit: GENERATIONS_LIMIT, content });
@@ -44,8 +46,9 @@ export async function GET(request: NextRequest) {
 
 /** POST { language } → streams a new 30-post calendar (Full plan only). */
 export async function POST(request: NextRequest) {
-  const userId = getUserId(request);
-  if (!userId) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  const auth = await requireAccess(request);
+  if (auth.error) return auth.error;
+  const userId = auth.userId;
 
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
   const language: Language =

@@ -62,7 +62,7 @@ export default function RegisterForm() {
       }
 
       localStorage.setItem('token', data.token);
-      router.push('/dashboard');
+      router.push(`/checkout?plan=${formData.plan === 'full' ? 'full' : 'basic'}`);
     } catch (err) {
       setError(t('connectionError'));
     } finally {

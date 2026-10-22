@@ -1,62 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
-import { PrismaClient } from '@prisma/client';
+import { db } from '@/lib/prisma';
+import { getUserId } from '@/lib/route-progress';
+import { getAccess } from '@/lib/subscription';
 
 export const runtime = 'nodejs';
 
+/** GET → the signed-in user, their plan and whether their subscription gives access. */
 export async function GET(request: NextRequest) {
-  const prisma = new PrismaClient();
+  const userId = getUserId(request);
+  if (!userId) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+
   try {
-    const authHeader = request.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '');
-
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Token no proporcionado' },
-        { status: 401 }
-      );
-    }
-
-    const decoded = verifyToken(token);
-
-    if (!decoded) {
-      return NextResponse.json(
-        { error: 'Token inválido' },
-        { status: 401 }
-      );
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      include: {
-        profile: true,
-        subscription: true,
-      },
+    const user = await db().user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, plan: true },
     });
+    if (!user) return NextResponse.json({ error: 'not_found' }, { status: 404 });
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
-    }
-
+    const { access, status, subscription } = await getAccess(userId);
     return NextResponse.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        plan: user.plan,
+      user,
+      access,
+      subscription: {
+        status,
+        currentPeriodEnd: subscription?.currentPeriodEnd ?? null,
+        hasPayPal: Boolean(subscription?.paypalSubscriptionId),
       },
-      profile: user.profile,
-      subscription: user.subscription,
     });
   } catch (error) {
     console.error('Verify error:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
-  } finally {
-    await prisma.$disconnect();
+    return NextResponse.json({ error: 'server_error' }, { status: 500 });
   }
 }

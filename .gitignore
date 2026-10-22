@@ -44,3 +44,4 @@ prisma/dev.db
 # Cache
 .eslintcache
 *.tsbuildinfo
+.env.production

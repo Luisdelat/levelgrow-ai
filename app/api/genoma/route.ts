@@ -1,74 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
-import { PrismaClient } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
+import { db } from '@/lib/prisma';
+import { requireAccess } from '@/lib/subscription';
 
 export const runtime = 'nodejs';
 
+const FIELDS = [
+  'businessName',
+  'businessType',
+  'location',
+  'services',
+  'targetAudience',
+  'mainProblem',
+  'differentiation',
+  'currentChannels',
+  'salesProcess',
+  'mainObjective',
+  'marketingBudget',
+] as const;
+
+/** GET → the user's saved GENOMA versions, newest first. */
 export async function GET(request: NextRequest) {
-  const prisma = new PrismaClient();
+  const auth = await requireAccess(request);
+  if (auth.error) return auth.error;
   try {
-    const authHeader = request.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '');
-
-    if (!token) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
-
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
-    }
-
-    const genomas = await prisma.genoma.findMany({
-      where: { userId: decoded.userId },
+    const genomas = await db().genoma.findMany({
+      where: { userId: auth.userId },
       orderBy: { createdAt: 'desc' },
+      take: 10,
     });
-
     return NextResponse.json({ genomas });
   } catch (error) {
     console.error('Get genomas error:', error);
-    return NextResponse.json(
-      { error: 'Error interno' },
-      { status: 500 }
-    );
-  } finally {
-    await prisma.$disconnect();
+    return NextResponse.json({ error: 'server_error' }, { status: 500 });
   }
 }
 
+/** POST { data, status } → saves a new GENOMA version (only known text fields). */
 export async function POST(request: NextRequest) {
-  const prisma = new PrismaClient();
+  const auth = await requireAccess(request);
+  if (auth.error) return auth.error;
   try {
-    const authHeader = request.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '');
-
-    if (!token) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+    const raw = body.data && typeof body.data === 'object' ? (body.data as Record<string, unknown>) : {};
+    const data: Record<string, string> = {};
+    for (const key of FIELDS) {
+      if (typeof raw[key] === 'string') data[key] = (raw[key] as string).slice(0, 2000);
     }
-
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
-    }
-
-    const { data, status } = await request.json();
-
-    const genoma = await prisma.genoma.create({
+    const genoma = await db().genoma.create({
       data: {
-        userId: decoded.userId,
-        data: data || {},
-        status: status || 'draft',
+        userId: auth.userId,
+        data: data as Prisma.InputJsonValue,
+        status: body.status === 'completed' ? 'completed' : 'draft',
       },
     });
-
     return NextResponse.json({ genoma }, { status: 201 });
   } catch (error) {
     console.error('Create genoma error:', error);
-    return NextResponse.json(
-      { error: 'Error interno' },
-      { status: 500 }
-    );
-  } finally {
-    await prisma.$disconnect();
+    return NextResponse.json({ error: 'server_error' }, { status: 500 });
   }
 }

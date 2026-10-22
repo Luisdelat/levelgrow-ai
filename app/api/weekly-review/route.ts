@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/prisma';
-import { getUsage, getUserId, loadLatestGenoma, loadProgress } from '@/lib/route-progress';
+import { requireAccess } from '@/lib/subscription';
+import { getUsage, loadLatestGenoma, loadProgress } from '@/lib/route-progress';
 import { buildSystemPrompt, WEEKLY_REVIEW_BRIEF } from '@/lib/advisor-prompts';
 import { streamClaude } from '@/lib/claude-stream';
 import { FREE_CHAT_ID } from '@/lib/stages';
@@ -42,8 +43,9 @@ function describe(m: Metrics): string {
 
 /** GET → the user's latest 12 weekly reviews, newest first. */
 export async function GET(request: NextRequest) {
-  const userId = getUserId(request);
-  if (!userId) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  const auth = await requireAccess(request);
+  if (auth.error) return auth.error;
+  const userId = auth.userId;
   try {
     const sessions: { id: string; createdAt: Date }[] = await db().chatSession.findMany({
       where: { userId, title: { startsWith: 'revision:' } },
@@ -76,8 +78,9 @@ export async function GET(request: NextRequest) {
 
 /** POST { metrics, language } → streams the advisor's analysis (Full plan only). */
 export async function POST(request: NextRequest) {
-  const userId = getUserId(request);
-  if (!userId) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  const auth = await requireAccess(request);
+  if (auth.error) return auth.error;
+  const userId = auth.userId;
 
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
   const metrics = parseMetrics(body.metrics);

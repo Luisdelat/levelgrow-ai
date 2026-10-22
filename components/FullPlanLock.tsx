@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useLanguage } from '@/lib/useLanguage';
 import { APP_TEXT } from '@/lib/app-text';
 
@@ -20,6 +21,9 @@ export default function FullPlanLock({ title, description }: { title: string; de
       <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
         <p className="font-medium text-white">{T.lockedTitle}</p>
         <p className="mt-1 text-sm text-slate-400">{T.lockedSub}</p>
+        <Link href="/checkout?plan=full" className="btn-accent mt-4">
+          {T.upgradeCta} <span aria-hidden="true">→</span>
+        </Link>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/prisma';
-import { getUserId, getUsage, loadProgress, loadLatestGenoma, sessionTitle } from '@/lib/route-progress';
+import { requireAccess } from '@/lib/subscription';
+import { getUsage, loadProgress, loadLatestGenoma, sessionTitle } from '@/lib/route-progress';
 import { buildSystemPrompt, kickoffMessage } from '@/lib/advisor-prompts';
 import { streamClaude } from '@/lib/claude-stream';
 import { FREE_CHAT_ID, isStageId, type StageId } from '@/lib/stages';
@@ -47,8 +48,9 @@ async function loadMessages(sessionId: string): Promise<StoredMessage[]> {
 
 /** GET /api/advisor?stage=cliente → saved conversation for that stage. */
 export async function GET(request: NextRequest) {
-  const userId = getUserId(request);
-  if (!userId) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  const auth = await requireAccess(request);
+  if (auth.error) return auth.error;
+  const userId = auth.userId;
 
   const channel = parseChannel(request.nextUrl.searchParams.get('stage'));
   if (!channel) return NextResponse.json({ error: 'invalid_stage' }, { status: 400 });
@@ -71,8 +73,9 @@ export async function GET(request: NextRequest) {
  * Streams the advisor's reply as plain text and saves both turns.
  */
 export async function POST(request: NextRequest) {
-  const userId = getUserId(request);
-  if (!userId) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  const auth = await requireAccess(request);
+  if (auth.error) return auth.error;
+  const userId = auth.userId;
 
   let body: Record<string, unknown>;
   try {

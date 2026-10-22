@@ -28,17 +28,28 @@ function LogoWatermark() {
   );
 }
 
-export default function AppShell({ children }: { children: ReactNode }) {
+export default function AppShell({
+  children,
+  allowWithoutAccess = false,
+}: {
+  children: ReactNode;
+  /** The checkout page must open for users who have not paid yet. */
+  allowWithoutAccess?: boolean;
+}) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, authenticated, logout } = useAuth();
+  const { user, access, loading, authenticated, logout } = useAuth();
   const { language, changeLanguage } = useLanguage();
   const T = APP_TEXT[language];
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (!loading && !authenticated) router.replace('/auth/login');
-  }, [loading, authenticated, router]);
+    if (loading) return;
+    if (!authenticated) router.replace('/auth/login');
+    else if (access === false && !allowWithoutAccess) router.replace('/checkout');
+  }, [loading, authenticated, access, allowWithoutAccess, router]);
+
+  const blocked = loading || !authenticated || (access === false && !allowWithoutAccess);
 
   const nav = [
     { href: '/dashboard', label: T.navHome, match: (p: string) => p === '/dashboard' },
@@ -129,6 +140,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                       { href: '/dashboard/genoma', label: T.navGenoma },
                       { href: '/dashboard/contenido', label: T.contentTitle },
                       { href: '/dashboard/revision', label: T.reviewTitle },
+                      { href: '/checkout', label: T.navSubscription },
                     ].map((item) => (
                       <Link
                         key={item.href}
@@ -154,7 +166,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 pb-16 pt-8 sm:px-6">
-        {loading || !authenticated ? (
+        {blocked ? (
           <div className="flex min-h-[50vh] items-center justify-center">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
           </div>

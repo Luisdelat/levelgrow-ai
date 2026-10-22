@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { db } from '@/lib/prisma';
+import { requireAccess } from '@/lib/subscription';
 import {
-  getUserId,
   loadProgress,
   saveProgress,
   loadLatestGenoma,
@@ -19,8 +19,9 @@ export const maxDuration = 60;
 
 /** GET /api/progress → route progress + latest GENOMA answers. */
 export async function GET(request: NextRequest) {
-  const userId = getUserId(request);
-  if (!userId) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  const auth = await requireAccess(request);
+  if (auth.error) return auth.error;
+  const userId = auth.userId;
 
   try {
     const [progress, genoma] = await Promise.all([loadProgress(userId), loadLatestGenoma(userId)]);
@@ -39,8 +40,9 @@ export async function GET(request: NextRequest) {
  * final deliverable from the conversation and it is saved to the user's plan.
  */
 export async function POST(request: NextRequest) {
-  const userId = getUserId(request);
-  if (!userId) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  const auth = await requireAccess(request);
+  if (auth.error) return auth.error;
+  const userId = auth.userId;
 
   let body: Record<string, unknown>;
   try {
