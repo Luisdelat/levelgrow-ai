@@ -34,15 +34,15 @@ export async function POST(request: NextRequest) {
     // Get user's GENOMA for context
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      include: { profile: true, genoma: { orderBy: { createdAt: 'desc' }, take: 1 } },
+      include: { profile: true, genomas: { orderBy: { createdAt: 'desc' }, take: 1 } },
     });
 
     if (!user) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
-    const genomaContext = user.genoma?.[0]?.data
-      ? `\n\nGenoma del usuario:\n${JSON.stringify(user.genoma[0].data, null, 2)}`
+    const genomaContext = user.genomas?.[0]?.data
+      ? `\n\nGenoma del usuario:\n${JSON.stringify(user.genomas[0].data, null, 2)}`
       : '';
 
     const systemPrompt = `Eres un Asistente de Marketing experto basado en la metodología HAZTUAGENCIA. 
@@ -57,7 +57,7 @@ Responde siempre:
 Enfócate en: marketing digital, redes sociales, embudos de ventas, copywriting, automatización, y crecimiento.`;
 
     const response = await client.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-5-5',
       max_tokens: 1024,
       system: systemPrompt,
       messages: [
