@@ -287,3 +287,5 @@ export const translations = {
 };
 
 export type Language = 'es' | 'ru' | 'az' | 'en' | 'tr';
+
+export const LANGUAGES: Language[] = ['es', 'en', 'ru', 'tr', 'az'];

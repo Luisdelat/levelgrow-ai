@@ -1,205 +1,232 @@
 'use client';
 
-import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { FormEvent, useEffect, useState } from 'react';
+import AppShell from '@/components/AppShell';
+import { useLanguage } from '@/lib/useLanguage';
+import { APP_TEXT, fill, type AppText } from '@/lib/app-text';
+import { STAGE_IDS, STAGE_TEXT } from '@/lib/stages';
+import { authHeaders, completeStage, fetchProgress } from '@/lib/api-client';
 
-function GenomaBuilderContent() {
+const EMPTY = {
+  businessName: '',
+  businessType: '',
+  location: '',
+  services: '',
+  targetAudience: '',
+  mainProblem: '',
+  differentiation: '',
+  currentChannels: '',
+  salesProcess: '',
+  mainObjective: '',
+  marketingBudget: '',
+};
+
+type GenomaForm = typeof EMPTY;
+type FieldKey = keyof GenomaForm;
+
+interface FieldDef {
+  key: FieldKey;
+  label: keyof AppText;
+  placeholder: keyof AppText;
+  multiline?: boolean;
+  required?: boolean;
+}
+
+const SECTIONS: { title: keyof AppText; fields: FieldDef[] }[] = [
+  {
+    title: 'secBusiness',
+    fields: [
+      { key: 'businessName', label: 'fBusinessName', placeholder: 'pBusinessName', required: true },
+      { key: 'businessType', label: 'fBusinessType', placeholder: 'pBusinessType', required: true },
+      { key: 'location', label: 'fLocation', placeholder: 'pLocation' },
+      { key: 'services', label: 'fServices', placeholder: 'pServices', multiline: true },
+    ],
+  },
+  {
+    title: 'secClient',
+    fields: [
+      { key: 'targetAudience', label: 'fTarget', placeholder: 'pTarget', multiline: true, required: true },
+      { key: 'mainProblem', label: 'fProblem', placeholder: 'pProblem', multiline: true },
+      { key: 'differentiation', label: 'fDiff', placeholder: 'pDiff', multiline: true },
+    ],
+  },
+  {
+    title: 'secNow',
+    fields: [
+      { key: 'currentChannels', label: 'fChannels', placeholder: 'pChannels', multiline: true },
+      { key: 'salesProcess', label: 'fSales', placeholder: 'pSales', multiline: true },
+      { key: 'mainObjective', label: 'fObjective', placeholder: 'pObjective', multiline: true },
+      { key: 'marketingBudget', label: 'fBudget', placeholder: 'pBudget' },
+    ],
+  },
+];
+
+const TYPE_OPTIONS: { value: string; label: keyof AppText }[] = [
+  { value: 'local', label: 'tLocal' },
+  { value: 'services', label: 'tServices' },
+  { value: 'ecommerce', label: 'tEcommerce' },
+  { value: 'coaching', label: 'tCoaching' },
+  { value: 'other', label: 'tOther' },
+];
+
+function GenomaContent() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [genoma, setGenoma] = useState({
-    businessName: '',
-    businessType: '',
-    targetAudience: '',
-    mainProblem: '',
-    mainObjective: '',
-    services: '',
-    differentiation: '',
-    salesProcess: '',
-  });
+  const { language } = useLanguage();
+  const T = APP_TEXT[language];
+  const [form, setForm] = useState<GenomaForm>(EMPTY);
+  const [ready, setReady] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setGenoma(prev => ({ ...prev, [name]: value }));
-  };
+  // Prefill with the latest saved GENOMA.
+  useEffect(() => {
+    fetchProgress()
+      .then((p) => {
+        if (p.genoma) {
+          const next = { ...EMPTY };
+          for (const key of Object.keys(EMPTY) as FieldKey[]) {
+            const v = p.genoma[key];
+            if (typeof v === 'string') next[key] = v;
+          }
+          setForm(next);
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => setReady(true));
+  }, []);
 
-  const handleSave = async () => {
-    setLoading(true);
+  const update = (key: FieldKey, value: string) => setForm((prev) => ({ ...prev, [key]: value }));
+
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!form.businessName.trim() || !form.businessType || !form.targetAudience.trim()) {
+      setError(T.requiredError);
+      return;
+    }
+    setSaving(true);
+    setError('');
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/genoma', {
+      const res = await fetch('/api/genoma', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          data: genoma,
-          status: 'draft',
-        }),
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: form, status: 'completed' }),
       });
-
-      if (!response.ok) throw new Error('Error al guardar');
-
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Error al guardar el GENOMA');
-    } finally {
-      setLoading(false);
+      if (!res.ok) throw new Error(`genoma ${res.status}`);
+      const p = await completeStage('genoma', language);
+      const next = STAGE_IDS.find((id) => id !== 'genoma' && !p.completed.includes(id)) ?? 'cliente';
+      router.push(`/dashboard/ruta/${next}`);
+    } catch (err) {
+      console.error(err);
+      setError(T.saveError);
+      setSaving(false);
     }
   };
 
+  if (!ready) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950 to-gray-950">
-      {/* Header */}
-      <div className="bg-gray-900/40 backdrop-blur-xl border-b border-blue-500/10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/dashboard" className="text-gray-400 hover:text-white flex items-center gap-2">
-            ← Volver al dashboard
-          </Link>
-          <h1 className="text-2xl font-bold text-white">GENOMA Builder</h1>
-          <div className="w-20"></div>
+    <form onSubmit={onSubmit} className="mx-auto max-w-3xl space-y-6">
+      <header className="rise-in">
+        <p className="text-sm font-medium text-blue-400">{fill(T.stageOf, { n: 1, total: STAGE_IDS.length })}</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white sm:text-3xl">{T.genomaTitle}</h1>
+        <p className="mt-2 text-slate-400">{T.genomaSub}</p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {STAGE_TEXT[language].genoma.deliverables.map((d) => (
+            <span key={d} className="rounded-full border border-slate-700 bg-slate-950/50 px-3 py-1 text-xs text-slate-300">
+              {d}
+            </span>
+          ))}
+        </div>
+      </header>
+
+      {SECTIONS.map((section, si) => (
+        <fieldset
+          key={section.title}
+          className="panel rise-in p-6 sm:p-8"
+          style={{ animationDelay: `${(si + 1) * 70}ms` }}
+        >
+          <legend className="sr-only">{T[section.title] as string}</legend>
+          <div className="mb-6 flex items-center gap-3">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600/15 text-sm font-semibold text-blue-400 ring-1 ring-blue-500/30">
+              {si + 1}
+            </span>
+            <h2 className="text-lg font-semibold text-white">{T[section.title] as string}</h2>
+          </div>
+          <div className="grid gap-5">
+            {section.fields.map((f) => (
+              <label key={f.key} className="block">
+                <span className="mb-2 flex items-baseline gap-2 text-sm font-medium text-slate-200">
+                  {T[f.label] as string}
+                  {f.required && <span className="text-xs font-normal text-slate-500">({T.required})</span>}
+                </span>
+                {f.key === 'businessType' ? (
+                  <select
+                    value={form.businessType}
+                    onChange={(e) => update('businessType', e.target.value)}
+                    className="field"
+                  >
+                    <option value="">{T.pBusinessType}</option>
+                    {TYPE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {T[o.label] as string}
+                      </option>
+                    ))}
+                    {form.businessType && !TYPE_OPTIONS.some((o) => o.value === form.businessType) && (
+                      <option value={form.businessType}>{form.businessType}</option>
+                    )}
+                  </select>
+                ) : f.multiline ? (
+                  <textarea
+                    value={form[f.key]}
+                    onChange={(e) => update(f.key, e.target.value)}
+                    placeholder={T[f.placeholder] as string}
+                    rows={3}
+                    maxLength={1500}
+                    className="field resize-y"
+                  />
+                ) : (
+                  <input
+                    value={form[f.key]}
+                    onChange={(e) => update(f.key, e.target.value)}
+                    placeholder={T[f.placeholder] as string}
+                    maxLength={200}
+                    className="field"
+                  />
+                )}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ))}
+
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Link href="/dashboard" className="btn-quiet">
+          {T.cancel}
+        </Link>
+        <div className="flex flex-col items-stretch gap-2 sm:items-end">
+          {error && <p className="text-sm text-amber-300">{error}</p>}
+          <button type="submit" disabled={saving} className="btn-accent px-6 py-3">
+            {saving ? T.saving : T.saveContinue}
+            {!saving && <span aria-hidden="true">→</span>}
+          </button>
         </div>
       </div>
-
-      {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="bg-gray-900/60 backdrop-blur-xl rounded-xl border border-blue-500/20 p-8">
-          <h2 className="text-3xl font-bold text-white mb-8">Define tu GENOMA de Marketing</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Nombre del Negocio */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Nombre de tu Negocio</label>
-              <input
-                type="text"
-                name="businessName"
-                value={genoma.businessName}
-                onChange={handleChange}
-                placeholder="Ej: Mi Agencia Digital"
-                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Tipo de Negocio */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Tipo de Negocio</label>
-              <select
-                name="businessType"
-                value={genoma.businessType}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="">Selecciona un tipo</option>
-                <option value="service">Servicios</option>
-                <option value="product">Productos</option>
-                <option value="saas">SaaS</option>
-                <option value="ecommerce">E-commerce</option>
-                <option value="consulting">Consultoría</option>
-                <option value="agency">Agencia</option>
-              </select>
-            </div>
-
-            {/* Audiencia */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Audiencia Target</label>
-              <textarea
-                name="targetAudience"
-                value={genoma.targetAudience}
-                onChange={handleChange}
-                placeholder="Describe quién es tu cliente ideal (edad, profesión, problemas, etc.)"
-                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 h-24"
-              />
-            </div>
-
-            {/* Problema Principal */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Problema Principal que Resuelves</label>
-              <textarea
-                name="mainProblem"
-                value={genoma.mainProblem}
-                onChange={handleChange}
-                placeholder="¿Cuál es el principal problema que resuelves para tus clientes?"
-                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 h-24"
-              />
-            </div>
-
-            {/* Objetivo Principal */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Objetivo Principal de Marketing</label>
-              <textarea
-                name="mainObjective"
-                value={genoma.mainObjective}
-                onChange={handleChange}
-                placeholder="¿Cuál es tu objetivo de marketing más importante en los próximos 3-6 meses?"
-                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 h-24"
-              />
-            </div>
-
-            {/* Servicios/Productos */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Servicios/Productos Principales</label>
-              <textarea
-                name="services"
-                value={genoma.services}
-                onChange={handleChange}
-                placeholder="Lista tus servicios o productos principales"
-                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 h-24"
-              />
-            </div>
-
-            {/* Diferenciación */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-2">¿Qué te Diferencia?</label>
-              <textarea
-                name="differentiation"
-                value={genoma.differentiation}
-                onChange={handleChange}
-                placeholder="¿Qué te hace diferente a la competencia?"
-                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 h-24"
-              />
-            </div>
-
-            {/* Proceso de Ventas */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Tu Proceso de Ventas</label>
-              <textarea
-                name="salesProcess"
-                value={genoma.salesProcess}
-                onChange={handleChange}
-                placeholder="Describe tu proceso de ventas actual"
-                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 h-24"
-              />
-            </div>
-          </div>
-
-          {/* Buttons */}
-          <div className="flex gap-4 mt-8 pt-8 border-t border-gray-700">
-            <button
-              onClick={handleSave}
-              disabled={loading}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold py-3 rounded-lg transition"
-            >
-              {loading ? 'Guardando...' : 'Guardar GENOMA'}
-            </button>
-            <Link href="/dashboard" className="flex-1">
-              <button className="w-full px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-lg transition">
-                Cancelar
-              </button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
+    </form>
   );
 }
 
 export default function GenomaBuilder() {
   return (
-    <ProtectedRoute>
-      <GenomaBuilderContent />
-    </ProtectedRoute>
+    <AppShell>
+      <GenomaContent />
+    </AppShell>
   );
 }
