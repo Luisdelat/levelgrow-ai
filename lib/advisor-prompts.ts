@@ -101,6 +101,8 @@ export function buildSystemPrompt(opts: {
   genoma: GenomaData | null;
   completed: StageId[];
   summaries: Partial<Record<StageId, string>>;
+  /** Replaces the stage brief (used by the Full plan tools). */
+  brief?: string;
 }): string {
   const { stage, language, genoma, completed, summaries } = opts;
   const langName = LANGUAGE_NAMES[language];
@@ -114,7 +116,7 @@ export function buildSystemPrompt(opts: {
     .map((id) => `### ${STAGE_TEXT.es[id].title}\n${summaries[id]}`)
     .join('\n\n');
 
-  const brief = stage === FREE_CHAT_ID ? FREE_BRIEF : STAGE_BRIEFS[stage];
+  const brief = opts.brief ?? (stage === FREE_CHAT_ID ? FREE_BRIEF : STAGE_BRIEFS[stage]);
 
   return `Eres el Asesor de Marketing de LEVELGROW AI. Eres un mentor experto en marketing y ventas que lleva de la mano a dueños de negocio para conseguir clientes y vender más, usando la metodología HAZTUAGENCIA.
 
@@ -156,3 +158,30 @@ export function summaryInstruction(language: Language): string {
   return `Con base en esta conversación, escribe el ENTREGABLE FINAL de la etapa en ${LANGUAGE_NAMES[language]}.
 Reglas: solo lo acordado o lo último que propusiste, listo para usar; Markdown con subtítulos cortos y listas; máximo 350 palabras; sin saludo ni explicación previa; no inventes datos que el usuario no dio (si falta algo, márcalo como "Por definir").`;
 }
+
+export const CONTENT_CALENDAR_BRIEF = `TAREA: CALENDARIO DE CONTENIDO DEL MES (Plan Full).
+Crea 30 publicaciones para los próximos 30 días, pensadas para atraer a su cliente ideal y convertirlo en conversaciones y ventas.
+Esta tarea es la excepción al límite de longitud de mensajes. No menciones el botón «Completar etapa» ni termines con preguntas.
+Reglas:
+- Usa su GENOMA y lo que construyó en su ruta (cliente ideal, oferta, embudo). Si falta información, haz supuestos razonables y dilos al inicio en una línea.
+- Mezcla: 40% educativo (resolver dolores), 20% prueba social/antes y después, 20% detrás de cámara/historia del negocio, 20% venta directa con su oferta.
+- Formatos realistas para grabar con un celular: video corto (reel), carrusel, historia, foto con texto. Mayoría video corto.
+- Cada publicación termina con un CTA concreto (sígueme, comenta una palabra, escríbeme por WhatsApp, agenda).
+- No inventes testimonios ni cifras; si sugieres prueba social, indica usar un caso real del negocio.
+Formato de salida (Markdown, sin introducción larga):
+- Una línea con los supuestos (si los hay).
+- Encabezado por semana: "## Semana 1" … "## Semana 4" (la semana 4 con 9 o 10 publicaciones para llegar a 30).
+- Cada publicación en este formato exacto, compacto:
+  **Día N · [Formato]** — *Gancho:* "…" — *Idea:* … — *CTA:* …
+- Termina con 3 recomendaciones breves de publicación (horario, constancia, cómo reutilizar los mejores).`;
+
+export const WEEKLY_REVIEW_BRIEF = `TAREA: REVISIÓN SEMANAL DE RESULTADOS (Plan Full).
+El usuario comparte sus números de la semana. Analiza como un mentor de ventas que se basa en datos.
+No menciones el botón «Completar etapa».
+Reglas:
+- Calcula las tasas que se puedan con los datos: conversación → cita, cita → venta, costo por conversación y por venta si hubo inversión en anuncios, ingreso por venta. Muestra las cuentas en una línea.
+- Si hay una semana anterior, compara y di qué mejoró o empeoró.
+- Identifica UN cuello de botella principal (el paso del proceso donde más se pierde).
+- Da exactamente 3 acciones concretas para la próxima semana, con número objetivo cuando aplique.
+- Reconoce lo que hizo bien en una línea. Sé directo y honesto; no inventes datos.
+Formato (Markdown, máximo 350 palabras): "### Tus números", "### Lo que funciona", "### Cuello de botella", "### Tus 3 acciones para la próxima semana".`;

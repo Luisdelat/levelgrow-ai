@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm';
 import LogoMark from './LogoMark';
 import { authHeaders } from '@/lib/api-client';
 import { useLanguage } from '@/lib/useLanguage';
-import { APP_TEXT } from '@/lib/app-text';
+import { APP_TEXT, fill } from '@/lib/app-text';
 
 interface ChatMessage {
   id: string;
@@ -32,6 +32,7 @@ export default function AdvisorChat({ channel, onUserMessageCount, className = '
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
+  const [limitInfo, setLimitInfo] = useState<{ plan: string; limit: number } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const kickedOff = useRef(false);
   const languageRef = useRef(language);
@@ -51,9 +52,11 @@ export default function AdvisorChat({ channel, onUserMessageCount, className = '
     async (text: string | null) => {
       setBusy(true);
       setError(false);
+      setLimitInfo(null);
       const replyId = `a-${Date.now()}`;
+      const userMsgId = `u-${Date.now()}`;
       if (text) {
-        setMessages((prev) => [...prev, { id: `u-${Date.now()}`, role: 'user', content: text }]);
+        setMessages((prev) => [...prev, { id: userMsgId, role: 'user', content: text }]);
       }
       setMessages((prev) => [...prev, { id: replyId, role: 'assistant', content: '' }]);
 
@@ -67,6 +70,14 @@ export default function AdvisorChat({ channel, onUserMessageCount, className = '
               : { stage: channel, kickoff: true, language: languageRef.current },
           ),
         });
+        if (res.status === 402) {
+          // Monthly message limit reached: the message was not saved.
+          const data = await res.json().catch(() => ({}));
+          setMessages((prev) => prev.filter((m) => m.id !== replyId && m.id !== userMsgId));
+          if (text) setInput(text);
+          setLimitInfo({ plan: data.plan ?? 'basic', limit: data.limit ?? 0 });
+          return;
+        }
         if (!res.ok || !res.body) throw new Error(`advisor ${res.status}`);
 
         const reader = res.body.getReader();
@@ -210,6 +221,12 @@ export default function AdvisorChat({ channel, onUserMessageCount, className = '
               <span className="typing-dot h-1.5 w-1.5 rounded-full bg-slate-400" style={{ animationDelay: '0.3s' }} />
             </span>
             <span>{T.thinking}</span>
+          </div>
+        )}
+
+        {limitInfo && (
+          <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-sm text-blue-100">
+            {fill(limitInfo.plan === 'full' ? T.limitFull : T.limitBasic, { limit: limitInfo.limit })}
           </div>
         )}
 

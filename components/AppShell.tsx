@@ -125,13 +125,20 @@ export default function AppShell({ children }: { children: ReactNode }) {
                         </Link>
                       ))}
                     </div>
-                    <Link
-                      href="/dashboard/genoma"
-                      onClick={() => setMenuOpen(false)}
-                      className="block rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800"
-                    >
-                      {T.navGenoma}
-                    </Link>
+                    {[
+                      { href: '/dashboard/genoma', label: T.navGenoma },
+                      { href: '/dashboard/contenido', label: T.contentTitle },
+                      { href: '/dashboard/revision', label: T.reviewTitle },
+                    ].map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMenuOpen(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
                     <button
                       onClick={logout}
                       className="mt-1 block w-full rounded-lg px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white"

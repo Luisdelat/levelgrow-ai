@@ -5,6 +5,7 @@ import { db } from './prisma';
 import { verifyToken } from './auth';
 import { isStageId, type StageId } from './stages';
 import type { GenomaData } from './advisor-prompts';
+import { PLANS, planOf, monthStart, type PlanId } from './plans';
 
 export interface RouteProgress {
   completed: StageId[];
@@ -75,4 +76,35 @@ export async function loadLatestGenoma(userId: string): Promise<GenomaData | nul
 
 export function sessionTitle(stage: string): string {
   return `ruta:${stage}`;
+}
+
+export interface Usage {
+  plan: PlanId;
+  used: number;
+  limit: number;
+  contentCalendar: boolean;
+  weeklyReview: boolean;
+}
+
+/** Advisor messages the user sent this calendar month (route + free chat). */
+export async function getUsage(userId: string): Promise<Usage> {
+  const [user, used] = await Promise.all([
+    db().user.findUnique({ where: { id: userId }, select: { plan: true } }),
+    db().chatMessage.count({
+      where: {
+        role: 'user',
+        createdAt: { gte: monthStart() },
+        session: { userId, title: { startsWith: 'ruta:' } },
+      },
+    }),
+  ]);
+  const plan = planOf(user?.plan);
+  const limits = PLANS[plan];
+  return {
+    plan,
+    used,
+    limit: limits.monthlyMessages,
+    contentCalendar: limits.contentCalendar,
+    weeklyReview: limits.weeklyReview,
+  };
 }

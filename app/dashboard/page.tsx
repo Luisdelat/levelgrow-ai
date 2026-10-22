@@ -6,7 +6,7 @@ import AppShell from '@/components/AppShell';
 import { useLanguage } from '@/lib/useLanguage';
 import { APP_TEXT, fill } from '@/lib/app-text';
 import { STAGE_IDS, STAGE_TEXT, stageHref, type StageId } from '@/lib/stages';
-import { fetchProgress, type ProgressResponse } from '@/lib/api-client';
+import { fetchProgress, fetchUsage, type ProgressResponse, type UsageResponse } from '@/lib/api-client';
 
 function StageIcon({ state, index }: { state: 'done' | 'current' | 'pending'; index: number }) {
   if (state === 'done') {
@@ -37,12 +37,16 @@ function DashboardContent() {
   const S = STAGE_TEXT[language];
   const [progress, setProgress] = useState<ProgressResponse | null>(null);
   const [loadError, setLoadError] = useState(false);
+  const [usage, setUsage] = useState<UsageResponse | null>(null);
   const [tipIndex] = useState(() => new Date().getDate());
 
   useEffect(() => {
     fetchProgress()
       .then(setProgress)
       .catch(() => setLoadError(true));
+    fetchUsage()
+      .then(setUsage)
+      .catch(() => undefined);
   }, []);
 
   const completed = useMemo(() => progress?.completed ?? [], [progress]);
@@ -81,6 +85,19 @@ function DashboardContent() {
                 style={{ width: `${progress ? Math.max(pct, 3) : 0}%` }}
               />
             </div>
+            {usage && (
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800 pt-4 text-sm">
+                <span className="text-slate-400">
+                  {T.usageLabel}
+                  <span className="ml-2 rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-300">
+                    {usage.plan === 'full' ? T.planFull : T.planBasic}
+                  </span>
+                </span>
+                <span className="tabular-nums text-slate-300">
+                  {fill(T.usageCount, { used: usage.used, limit: usage.limit.toLocaleString() })}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -162,33 +179,44 @@ function DashboardContent() {
       </section>
 
       {/* Tools + tip */}
-      <section className="rise-in grid gap-4 lg:grid-cols-4" style={{ animationDelay: '160ms' }}>
-        <h2 className="sr-only">{T.toolsTitle}</h2>
-        {[
-          { href: '/dashboard/chat', title: T.navAdvisor, text: T.toolAdvisor, icon: 'M4 5h16v10H8l-4 4V5Z' },
-          { href: '/dashboard/plan', title: T.navPlan, text: T.toolPlan, icon: 'M6 3h9l3 3v15H6V3Zm3 7h6m-6 4h6m-6 4h4' },
-          { href: '/dashboard/genoma', title: T.navGenoma, text: T.toolGenoma, icon: 'M7 3c0 6 10 6 10 12s-10 6-10 6m10-18c0 6-10 6-10 12' },
-        ].map((tool) => (
-          <Link key={tool.href} href={tool.href} className="panel panel-hover group p-5">
-            <svg
-              viewBox="0 0 24 24"
-              className="h-5 w-5 text-blue-400"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d={tool.icon} />
-            </svg>
-            <h3 className="mt-4 font-medium text-white">{tool.title}</h3>
-            <p className="mt-1 text-sm text-slate-400">{tool.text}</p>
-          </Link>
-        ))}
-        <div className="panel border-blue-500/20 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-400">{T.tipTitle}</p>
-          <p className="mt-3 text-sm leading-relaxed text-slate-300">“{tip}”</p>
+      <section className="rise-in" style={{ animationDelay: '160ms' }}>
+        <h2 className="mb-4 text-lg font-semibold text-white">{T.toolsTitle}</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            { href: '/dashboard/chat', title: T.navAdvisor, text: T.toolAdvisor, icon: 'M4 5h16v10H8l-4 4V5Z', full: false },
+            { href: '/dashboard/plan', title: T.navPlan, text: T.toolPlan, icon: 'M6 3h9l3 3v15H6V3Zm3 7h6m-6 4h6m-6 4h4', full: false },
+            { href: '/dashboard/genoma', title: T.navGenoma, text: T.toolGenoma, icon: 'M7 3c0 6 10 6 10 12s-10 6-10 6m10-18c0 6-10 6-10 12', full: false },
+            { href: '/dashboard/contenido', title: T.contentTitle, text: T.toolContent, icon: 'M4 5h16v15H4V5Zm0 5h16M9 3v4m6-4v4', full: true },
+            { href: '/dashboard/revision', title: T.reviewTitle, text: T.toolReview, icon: 'M4 19V9m6 10V5m6 14v-7m4 7H2', full: true },
+          ].map((tool) => (
+            <Link key={tool.href} href={tool.href} className="panel panel-hover group p-5">
+              <div className="flex items-start justify-between gap-3">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-5 w-5 text-blue-400"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d={tool.icon} />
+                </svg>
+                {tool.full && (
+                  <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[11px] font-semibold text-blue-300 ring-1 ring-blue-500/30">
+                    {T.fullBadge}
+                  </span>
+                )}
+              </div>
+              <h3 className="mt-4 font-medium text-white">{tool.title}</h3>
+              <p className="mt-1 text-sm text-slate-400">{tool.text}</p>
+            </Link>
+          ))}
+          <div className="panel border-blue-500/20 p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-400">{T.tipTitle}</p>
+            <p className="mt-3 text-sm leading-relaxed text-slate-300">“{tip}”</p>
+          </div>
         </div>
       </section>
     </div>

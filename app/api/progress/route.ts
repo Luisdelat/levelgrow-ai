@@ -9,13 +9,13 @@ import {
   sessionTitle,
 } from '@/lib/route-progress';
 import { buildSystemPrompt, summaryInstruction } from '@/lib/advisor-prompts';
+import { ADVISOR_MODEL } from '@/lib/claude-stream';
 import { isStageId, STAGE_IDS } from '@/lib/stages';
 import { LANGUAGES, type Language } from '@/lib/translations';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-const MODEL = 'claude-sonnet-5-5';
 
 /** GET /api/progress → route progress + latest GENOMA answers. */
 export async function GET(request: NextRequest) {
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
 
       const client = new Anthropic();
       const response = await client.messages.create({
-        model: MODEL,
+        model: ADVISOR_MODEL,
         max_tokens: 1500,
         system: buildSystemPrompt({
           stage,

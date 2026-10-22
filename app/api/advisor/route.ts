@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
 import { db } from '@/lib/prisma';
-import { getUserId, loadProgress, loadLatestGenoma, sessionTitle } from '@/lib/route-progress';
+import { getUserId, getUsage, loadProgress, loadLatestGenoma, sessionTitle } from '@/lib/route-progress';
 import { buildSystemPrompt, kickoffMessage } from '@/lib/advisor-prompts';
+import { streamClaude } from '@/lib/claude-stream';
 import { FREE_CHAT_ID, isStageId, type StageId } from '@/lib/stages';
 import { LANGUAGES, type Language } from '@/lib/translations';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-const MODEL = 'claude-sonnet-5-5';
 const HISTORY_LIMIT = 40;
 const MAX_INPUT_CHARS = 4000;
 
@@ -121,6 +120,13 @@ export async function POST(request: NextRequest) {
     const isRetry = lastSaved?.role === 'user' && lastSaved.content === message;
     if (isRetry) history = history.slice(0, -1);
     if (!kickoff && !isRetry) {
+      const usage = await getUsage(userId);
+      if (usage.used >= usage.limit) {
+        return NextResponse.json(
+          { error: 'limit_reached', plan: usage.plan, used: usage.used, limit: usage.limit },
+          { status: 402 },
+        );
+      }
       await db().chatMessage.create({ data: { sessionId: session.id, role: 'user', content: message } });
     }
   } catch (error) {
@@ -145,43 +151,14 @@ export async function POST(request: NextRequest) {
     else turns.push({ role: 'user', content: message });
   }
 
-  const client = new Anthropic();
   const sessionId = session.id;
-  const encoder = new TextEncoder();
-
-  const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      let full = '';
-      try {
-        const response = client.messages.stream({
-          model: MODEL,
-          max_tokens: 2000,
-          system: systemPrompt,
-          messages: turns,
-        });
-        for await (const event of response) {
-          if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-            full += event.delta.text;
-            controller.enqueue(encoder.encode(event.delta.text));
-          }
-        }
-        if (full.trim()) {
-          await db().chatMessage.create({ data: { sessionId, role: 'assistant', content: full } });
-          await db().chatSession.update({ where: { id: sessionId }, data: { updatedAt: new Date() } });
-        }
-      } catch (error) {
-        console.error('Advisor stream error:', error);
-        controller.enqueue(encoder.encode('\n\n[[ADVISOR_ERROR]]'));
-      } finally {
-        controller.close();
-      }
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'no-cache, no-transform',
+  return streamClaude({
+    system: systemPrompt,
+    messages: turns,
+    maxTokens: 2000,
+    onComplete: async (full) => {
+      await db().chatMessage.create({ data: { sessionId, role: 'assistant', content: full } });
+      await db().chatSession.update({ where: { id: sessionId }, data: { updatedAt: new Date() } });
     },
   });
 }
