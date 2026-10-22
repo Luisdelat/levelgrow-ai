@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   console.log('Health check - checking database connection...');
   console.log('DATABASE_URL set:', !!process.env.DATABASE_URL);
-  
+
   const prisma = new PrismaClient({
     log: ['query', 'error', 'warn'],
   });
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     // Simple connection test
     const result = await prisma.$queryRaw`SELECT NOW() as timestamp`;
     console.log('✓ Database connection successful');
-    
+
     return NextResponse.json({
       status: 'ok',
       database: 'connected',

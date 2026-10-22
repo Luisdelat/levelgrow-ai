@@ -1,68 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getTokenFromRequest, verifyToken } from '@/lib/auth';
+import { verifyToken } from '@/lib/auth';
 import { PrismaClient } from '@prisma/client';
 
-export async function POST(request: NextRequest) {
+export const runtime = 'nodejs';
+
+export async function GET(request: NextRequest) {
   const prisma = new PrismaClient();
   try {
-    const token = getTokenFromRequest(request);
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '');
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const decoded = verifyToken(token);
     if (!decoded) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
     }
 
-    const genoma = await request.json();
-
-    // Update or create genoma
-    let savedGenoma = await prisma.genoma.findFirst({
+    const genomas = await prisma.genoma.findMany({
       where: { userId: decoded.userId },
+      orderBy: { createdAt: 'desc' },
     });
 
-    if (savedGenoma) {
-      savedGenoma = await prisma.genoma.update({
-        where: { id: savedGenoma.id },
-        data: {
-          data: genoma,
-          status: 'completed',
-        },
-      });
-    } else {
-      savedGenoma = await prisma.genoma.create({
-        data: {
-          userId: decoded.userId,
-          data: genoma,
-          status: 'completed',
-        },
-      });
-    }
-
-    // Also update profile
-    await prisma.profile.update({
-      where: { userId: decoded.userId },
-      data: {
-        genoma,
-        businessName: genoma.businessName,
-        businessType: genoma.businessType,
-        targetAudience: genoma.targetAudience,
-      },
-    });
-
-    return NextResponse.json(savedGenoma, { status: 200 });
+    return NextResponse.json({ genomas });
   } catch (error) {
-    console.error('GENOMA save error:', error);
+    console.error('Get genomas error:', error);
     return NextResponse.json(
-      { error: 'Failed to save GENOMA' },
+      { error: 'Error interno' },
       { status: 500 }
     );
   } finally {
@@ -70,43 +36,36 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   const prisma = new PrismaClient();
   try {
-    const token = getTokenFromRequest(request);
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '');
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const decoded = verifyToken(token);
     if (!decoded) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
     }
 
-    const genoma = await prisma.genoma.findFirst({
-      where: { userId: decoded.userId },
-      orderBy: { createdAt: 'desc' },
+    const { data, status } = await request.json();
+
+    const genoma = await prisma.genoma.create({
+      data: {
+        userId: decoded.userId,
+        data: data || {},
+        status: status || 'draft',
+      },
     });
 
-    if (!genoma) {
-      return NextResponse.json(
-        { error: 'GENOMA not found' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(genoma, { status: 200 });
+    return NextResponse.json({ genoma }, { status: 201 });
   } catch (error) {
-    console.error('GENOMA fetch error:', error);
+    console.error('Create genoma error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch GENOMA' },
+      { error: 'Error interno' },
       { status: 500 }
     );
   } finally {

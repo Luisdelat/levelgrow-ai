@@ -1,43 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyPassword, generateToken } from '@/lib/auth';
+import { hashPassword, generateToken } from '@/lib/auth';
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
+
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   const prisma = new PrismaClient();
   try {
     const { email, password } = await request.json();
 
-    // Validate input
     if (!email || !password) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { error: 'Email y contraseña son requeridos' },
         { status: 400 }
       );
     }
 
-    // Find user
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
     if (!user) {
       return NextResponse.json(
-        { error: 'Invalid email or password' },
+        { error: 'Email o contraseña incorrectos' },
         { status: 401 }
       );
     }
 
-    // Verify password
-    const passwordValid = await verifyPassword(password, user.passwordHash);
+    const passwordMatch = await bcrypt.compare(password, user.passwordHash);
 
-    if (!passwordValid) {
+    if (!passwordMatch) {
       return NextResponse.json(
-        { error: 'Invalid email or password' },
+        { error: 'Email o contraseña incorrectos' },
         { status: 401 }
       );
     }
 
-    // Generate token
     const token = generateToken(user.id, user.email);
 
     return NextResponse.json(
@@ -54,7 +53,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     );
   } finally {

@@ -3,11 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useLanguage } from '@/lib/useLanguage';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 export default function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const planParam = searchParams.get('plan') || 'basic';
+  const { t } = useLanguage();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -18,6 +21,8 @@ export default function RegisterForm() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -33,7 +38,7 @@ export default function RegisterForm() {
     setLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setError(t('passwordMismatch'));
       setLoading(false);
       return;
     }
@@ -52,26 +57,30 @@ export default function RegisterForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Error al registrarse');
+        setError(data.error || t('connectionError'));
         return;
       }
 
-      // Store token and redirect to GENOMA onboarding
       localStorage.setItem('token', data.token);
-      router.push('/dashboard/onboarding');
+      router.push('/dashboard');
     } catch (err) {
-      setError('Error de conexión. Intenta de nuevo.');
+      setError(t('connectionError'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 flex flex-col items-center justify-center p-4">
+      {/* Language Selector */}
+      <div className="absolute top-4 right-4">
+        <LanguageSelector />
+      </div>
+
       <div className="w-full max-w-md">
         <div className="card">
           <h1 className="text-3xl font-bold mb-2 text-center">LEVELGROW AI</h1>
-          <p className="text-gray-400 text-center mb-8">Crea tu cuenta</p>
+          <p className="text-gray-400 text-center mb-8">{t('createAccount')}</p>
 
           {error && (
             <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-lg mb-6">
@@ -81,7 +90,7 @@ export default function RegisterForm() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Email</label>
+              <label className="block text-sm font-medium mb-2">{t('email')}</label>
               <input
                 type="email"
                 name="email"
@@ -94,41 +103,59 @@ export default function RegisterForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Contraseña</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="input"
-                placeholder="••••••••"
-                required
-              />
+              <label className="block text-sm font-medium mb-2">{t('password')}</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="input w-full pr-10"
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-300"
+                >
+                  {showPassword ? '👁️' : '👁️‍🗨️'}
+                </button>
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Confirmar Contraseña</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="input"
-                placeholder="••••••••"
-                required
-              />
+              <label className="block text-sm font-medium mb-2">{t('confirmPassword')}</label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="input w-full pr-10"
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-300"
+                >
+                  {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                </button>
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Plan</label>
+              <label className="block text-sm font-medium mb-2">{t('choosePlan')}</label>
               <select
                 name="plan"
                 value={formData.plan}
                 onChange={handleChange}
                 className="input"
               >
-                <option value="basic">Plan Básico - $49/mes</option>
-                <option value="full">Plan Full - $99/mes</option>
+                <option value="basic">{t('basicPlan')} - $49{t('perMonth')}</option>
+                <option value="full">{t('fullPlan')} - $99{t('perMonth')}</option>
               </select>
             </div>
 
@@ -137,14 +164,14 @@ export default function RegisterForm() {
               disabled={loading}
               className="btn-primary w-full mt-6"
             >
-              {loading ? 'Registrando...' : 'Registrarse'}
+              {loading ? t('signUp') + '...' : t('signUp')}
             </button>
           </form>
 
           <p className="text-center text-gray-400 mt-6">
-            ¿Ya tienes cuenta?{' '}
+            {t('haveAccount')}{' '}
             <Link href="/auth/login" className="text-blue-500 hover:text-blue-400">
-              Inicia sesión
+              {t('signInHere')}
             </Link>
           </p>
         </div>

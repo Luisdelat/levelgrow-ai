@@ -1,216 +1,85 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getTokenFromRequest, verifyToken } from '@/lib/auth';
+import { verifyToken } from '@/lib/auth';
 import { PrismaClient } from '@prisma/client';
-import Anthropic from '@anthropic-ai/sdk';
+import { Anthropic } from '@anthropic-ai/sdk';
 
-const SYSTEM_PROMPT = `Eres un asistente de marketing experto basado en la metodología HAZTUAGENCIA (HTA).
+export const runtime = 'nodejs';
 
-TU ROL PRINCIPAL:
-- Ayudar al usuario a ejecutar su estrategia de marketing basada en su GENOMA
-- Proporcionar acciones concretas y diarias para crecer su negocio
-- Ser su coach de marketing personalizado
-
-METODOLOGÍA:
-Usa siempre la metodología HTA que incluye:
-1. GENOMA: Análisis profundo del negocio
-2. EMBUDOS: Estrategias de conversión
-3. ANUNCIOS: Campañas con Meta Ads
-4. VENTAS: Cierre de clientes
-5. AUTOMATIZACIÓN: Sistemas que escalan
-
-TONO Y ESTILO:
-- Responde SIEMPRE en español
-- Sé directo, accionable y motivador
-- Proporciona pasos concretos que pueda hacer HOY
-- Basa cada recomendación en su GENOMA específico
-
-CUANDO RESPONDA:
-1. Considera el GENOMA del usuario (sus objetivos, público, problemas)
-2. Proporciona tácticas específicas de HTA
-3. Dale pequeñas acciones que pueda completar en 1-2 horas
-4. Sé su mentor de marketing, no solo un chatbot`;
+const client = new Anthropic();
 
 export async function POST(request: NextRequest) {
   const prisma = new PrismaClient();
-  const client = new Anthropic();
   try {
-    const token = getTokenFromRequest(request);
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '');
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const decoded = verifyToken(token);
     if (!decoded) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
     }
 
-    const { message, sessionId } = await request.json();
+    const { message } = await request.json();
 
     if (!message) {
       return NextResponse.json(
-        { error: 'Message is required' },
+        { error: 'Mensaje requerido' },
         { status: 400 }
       );
     }
 
-    // Get user and chat session
+    // Get user's GENOMA for context
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      include: { profile: true },
+      include: { profile: true, genoma: { orderBy: { createdAt: 'desc' }, take: 1 } },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
-    // Get or create chat session
-    let session;
-    if (sessionId) {
-      session = await prisma.chatSession.findUnique({
-        where: { id: sessionId },
-        include: { messages: true },
-      });
-    } else {
-      session = await prisma.chatSession.create({
-        data: {
-          userId: user.id,
-          title: message.substring(0, 50) + '...',
-        },
-        include: { messages: true },
-      });
-    }
+    const genomaContext = user.genoma?.[0]?.data
+      ? `\n\nGenoma del usuario:\n${JSON.stringify(user.genoma[0].data, null, 2)}`
+      : '';
 
-    if (!session || session.userId !== user.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
-      );
-    }
+    const systemPrompt = `Eres un Asistente de Marketing experto basado en la metodología HAZTUAGENCIA. 
+Tu rol es ayudar al usuario con estrategias de marketing, ventas, y crecimiento de su negocio.
 
-    // Save user message
-    await prisma.chatMessage.create({
-      data: {
-        sessionId: session.id,
-        role: 'user',
-        content: message,
-      },
-    });
+Responde siempre:
+- En español (México)
+- De manera concisa y directa
+- Con acciones prácticas que pueden implementar
+- Considerando su GENOMA de negocio${genomaContext}
 
-    // Build conversation history for Claude
-    const conversationHistory = session.messages.map((msg: any) => ({
-      role: msg.role as 'user' | 'assistant',
-      content: msg.content,
-    }));
+Enfócate en: marketing digital, redes sociales, embudos de ventas, copywriting, automatización, y crecimiento.`;
 
-    // Add the new user message
-    conversationHistory.push({
-      role: 'user',
-      content: message,
-    });
-
-    // Add context from user's profile if available
-    let contextPrompt = SYSTEM_PROMPT;
-    if (user.profile?.genoma) {
-      contextPrompt += `\n\nGENOMA del usuario:\n${JSON.stringify(user.profile.genoma, null, 2)}`;
-    }
-
-    // Call Claude API
     const response = await client.messages.create({
-      model: 'claude-opus-4-1',
+      model: 'claude-3-5-sonnet-20241022',
       max_tokens: 1024,
-      system: contextPrompt,
-      messages: conversationHistory,
+      system: systemPrompt,
+      messages: [
+        {
+          role: 'user',
+          content: message,
+        },
+      ],
     });
 
-    const assistantMessage = response.content[0].type === 'text' ? response.content[0].text : '';
+    const content = response.content[0];
+    if (content.type !== 'text') {
+      throw new Error('Unexpected response type');
+    }
 
-    // Save assistant response
-    await prisma.chatMessage.create({
-      data: {
-        sessionId: session.id,
-        role: 'assistant',
-        content: assistantMessage,
-      },
+    return NextResponse.json({
+      content: content.text,
     });
-
-    return NextResponse.json(
-      {
-        sessionId: session.id,
-        response: assistantMessage,
-      },
-      { status: 200 }
-    );
   } catch (error) {
     console.error('Chat error:', error);
     return NextResponse.json(
-      { error: 'Failed to process message' },
-      { status: 500 }
-    );
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
-export async function GET(request: NextRequest) {
-  const prisma = new PrismaClient();
-  try {
-    const token = getTokenFromRequest(request);
-
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
-    }
-
-    const sessionId = request.nextUrl.searchParams.get('sessionId');
-
-    if (!sessionId) {
-      // Get all sessions for user
-      const sessions = await prisma.chatSession.findMany({
-        where: { userId: decoded.userId },
-        orderBy: { createdAt: 'desc' },
-      });
-
-      return NextResponse.json(sessions);
-    }
-
-    // Get specific session with messages
-    const session = await prisma.chatSession.findUnique({
-      where: { id: sessionId },
-      include: { messages: true },
-    });
-
-    if (!session || session.userId !== decoded.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
-      );
-    }
-
-    return NextResponse.json(session);
-  } catch (error) {
-    console.error('Get chat error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch chat' },
+      { error: 'Error al procesar el mensaje' },
       { status: 500 }
     );
   } finally {

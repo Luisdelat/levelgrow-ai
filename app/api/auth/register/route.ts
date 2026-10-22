@@ -8,24 +8,24 @@ let dbInitialized = false;
 
 async function ensureDatabaseTables(prisma: PrismaClient) {
   if (dbInitialized) return;
-  
+
   try {
     // Try a simple query
     await prisma.$executeRawUnsafe('SELECT 1');
-    
+
     // Check if User table exists
     const result = await prisma.$queryRaw`
       SELECT EXISTS (
-        SELECT 1 FROM information_schema.tables 
+        SELECT 1 FROM information_schema.tables
         WHERE table_schema = 'public' AND table_name = 'User'
       )
     `;
-    
+
     const tableExists = (result as any[])?.[0]?.exists === true;
-    
+
     if (!tableExists) {
       console.log('Creating database tables...');
-      
+
       const tables = [
         'CREATE TABLE IF NOT EXISTS "User" ("id" TEXT NOT NULL PRIMARY KEY, "email" TEXT NOT NULL UNIQUE, "passwordHash" TEXT NOT NULL, "plan" TEXT NOT NULL DEFAULT \'basic\', "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(), "updatedAt" TIMESTAMP NOT NULL DEFAULT NOW())',
         'CREATE INDEX IF NOT EXISTS "User_email_idx" ON "User"("email")',
@@ -39,7 +39,7 @@ async function ensureDatabaseTables(prisma: PrismaClient) {
         'CREATE TABLE IF NOT EXISTS "Genoma" ("id" TEXT NOT NULL PRIMARY KEY, "userId" TEXT NOT NULL, "data" JSONB NOT NULL, "status" TEXT NOT NULL DEFAULT \'draft\', "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(), "updatedAt" TIMESTAMP NOT NULL DEFAULT NOW(), FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE)',
         'CREATE INDEX IF NOT EXISTS "Genoma_userId_idx" ON "Genoma"("userId")'
       ];
-      
+
       for (const sql of tables) {
         try {
           await prisma.$executeRawUnsafe(sql);
@@ -50,7 +50,7 @@ async function ensureDatabaseTables(prisma: PrismaClient) {
         }
       }
     }
-    
+
     dbInitialized = true;
   } catch (error) {
     console.error('Database table check failed:', error);
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
   try {
     // Ensure database tables exist
     await ensureDatabaseTables(prisma);
-    
+
     const { email, password, plan } = await request.json();
 
     // Validate input
