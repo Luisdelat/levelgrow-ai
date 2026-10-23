@@ -10,7 +10,8 @@ import { LANGUAGES, type Language } from '@/lib/translations';
 import { loadMemory } from '@/lib/business-memory';
 
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+// The 30-post calendar is a long reply.
+export const maxDuration = 120;
 
 const GENERATIONS_LIMIT = PLANS.full.calendarGenerations;
 

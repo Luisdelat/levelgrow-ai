@@ -110,6 +110,10 @@ export async function POST(request: NextRequest) {
         }),
         refreshMemory(userId, STAGE_TEXT.es[stage].title, rows.slice(-16)),
       ]);
+      if (response.stop_reason !== 'end_turn') {
+        // A cut-off deliverable must be visible in the logs.
+        console.error(`Deliverable for ${stage} stopped early: ${response.stop_reason}`);
+      }
       const summary = response.content
         .map((block) => (block.type === 'text' ? block.text : ''))
         .join('')

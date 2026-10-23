@@ -9,7 +9,8 @@ import { LANGUAGES, type Language } from '@/lib/translations';
 import { backfillMemory, loadMemory, refreshMemory } from '@/lib/business-memory';
 
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+// Long replies (3 full scripts) plus the background fact-sheet update need more than 60 s.
+export const maxDuration = 120;
 
 const HISTORY_LIMIT = 40;
 const MAX_INPUT_CHARS = 4000;
