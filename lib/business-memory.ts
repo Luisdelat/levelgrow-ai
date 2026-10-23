@@ -102,3 +102,26 @@ export async function refreshMemory(userId: string, stageTitle: string, turns: T
     console.error('Memory refresh failed:', error);
   }
 }
+
+/**
+ * First fill for users who talked to the advisor before the fact sheet existed:
+ * builds it from their most recent messages across every stage and the free chat.
+ */
+export async function backfillMemory(userId: string): Promise<void> {
+  try {
+    const sessions = await db().chatSession.findMany({
+      where: { userId, title: { startsWith: 'ruta:' } },
+      select: { id: true },
+    });
+    if (sessions.length === 0) return;
+    const rows = await db().chatMessage.findMany({
+      where: { sessionId: { in: sessions.map((s: { id: string }) => s.id) } },
+      orderBy: { createdAt: 'desc' },
+      take: 60,
+      select: { role: true, content: true },
+    });
+    await refreshMemory(userId, 'conversaciones anteriores', rows.reverse());
+  } catch (error) {
+    console.error('Memory backfill failed:', error);
+  }
+}

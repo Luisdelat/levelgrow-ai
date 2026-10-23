@@ -6,7 +6,7 @@ import { buildSystemPrompt, kickoffMessage } from '@/lib/advisor-prompts';
 import { streamClaude } from '@/lib/claude-stream';
 import { FREE_CHAT_ID, STAGE_TEXT, isStageId, type StageId } from '@/lib/stages';
 import { LANGUAGES, type Language } from '@/lib/translations';
-import { loadMemory, refreshMemory } from '@/lib/business-memory';
+import { backfillMemory, loadMemory, refreshMemory } from '@/lib/business-memory';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
   let session: { id: string };
   let history: { role: string; content: string }[];
   let systemPrompt: string;
+  let memory = '';
   try {
     session = (await findSession(userId, channel)) ??
       (await db().chatSession.create({ data: { userId, title: sessionTitle(channel) } }));
@@ -112,11 +113,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'already_started' }, { status: 409 });
     }
 
-    const [genoma, progress, memory] = await Promise.all([
+    const [genoma, progress, savedMemory] = await Promise.all([
       loadLatestGenoma(userId),
       loadProgress(userId),
       loadMemory(userId),
     ]);
+    memory = savedMemory;
     systemPrompt = buildSystemPrompt({
       stage: channel,
       language,
@@ -166,7 +168,10 @@ export async function POST(request: NextRequest) {
 
   // Update the fact sheet in the background (after the reply was sent), so the
   // advisor remembers what the user said here in every other stage.
-  if (!kickoff) {
+  if (!memory.trim()) {
+    // No fact sheet yet: build it from everything the user already told the advisor.
+    after(() => backfillMemory(userId));
+  } else if (!kickoff) {
     const userCount = history.filter((m) => m.role === 'user').length + 1;
     if (userCount % MEMORY_EVERY === 0) {
       const recent = [...history.slice(-11), { role: 'user', content: message }];
