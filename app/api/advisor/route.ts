@@ -1,17 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { db } from '@/lib/prisma';
 import { requireAccess } from '@/lib/subscription';
 import { getUsage, loadProgress, loadLatestGenoma, sessionTitle } from '@/lib/route-progress';
 import { buildSystemPrompt, kickoffMessage } from '@/lib/advisor-prompts';
 import { streamClaude } from '@/lib/claude-stream';
-import { FREE_CHAT_ID, isStageId, type StageId } from '@/lib/stages';
+import { FREE_CHAT_ID, STAGE_TEXT, isStageId, type StageId } from '@/lib/stages';
 import { LANGUAGES, type Language } from '@/lib/translations';
+import { loadMemory, refreshMemory } from '@/lib/business-memory';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 const HISTORY_LIMIT = 40;
 const MAX_INPUT_CHARS = 4000;
+/** Refresh the user's fact sheet after every N user messages in a conversation. */
+const MEMORY_EVERY = 2;
 
 type ChannelId = StageId | typeof FREE_CHAT_ID;
 interface StoredMessage {
@@ -109,13 +112,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'already_started' }, { status: 409 });
     }
 
-    const [genoma, progress] = await Promise.all([loadLatestGenoma(userId), loadProgress(userId)]);
+    const [genoma, progress, memory] = await Promise.all([
+      loadLatestGenoma(userId),
+      loadProgress(userId),
+      loadMemory(userId),
+    ]);
     systemPrompt = buildSystemPrompt({
       stage: channel,
       language,
       genoma,
       completed: progress.completed,
       summaries: progress.summaries,
+      memory,
     });
 
     // On a retry the same user turn is already saved; don't store it twice.
@@ -155,11 +163,26 @@ export async function POST(request: NextRequest) {
   }
 
   const sessionId = session.id;
+
+  // Update the fact sheet in the background (after the reply was sent), so the
+  // advisor remembers what the user said here in every other stage.
+  if (!kickoff) {
+    const userCount = history.filter((m) => m.role === 'user').length + 1;
+    if (userCount % MEMORY_EVERY === 0) {
+      const recent = [...history.slice(-11), { role: 'user', content: message }];
+      const title = channel === FREE_CHAT_ID ? 'Consulta libre' : STAGE_TEXT.es[channel].title;
+      after(() => refreshMemory(userId, title, recent));
+    }
+  }
+
   return streamClaude({
     system: systemPrompt,
     messages: turns,
-    maxTokens: 2000,
+    maxTokens: 3000,
     onComplete: async (full) => {
+      // If the page was reloaded while the welcome was being written, a second
+      // kickoff may run in parallel: keep only the first welcome.
+      if (kickoff && (await db().chatMessage.count({ where: { sessionId } })) > 0) return;
       await db().chatMessage.create({ data: { sessionId, role: 'assistant', content: full } });
       await db().chatSession.update({ where: { id: sessionId }, data: { updatedAt: new Date() } });
     },

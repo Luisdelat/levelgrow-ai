@@ -6,6 +6,7 @@ import { buildSystemPrompt, WEEKLY_REVIEW_BRIEF } from '@/lib/advisor-prompts';
 import { streamClaude } from '@/lib/claude-stream';
 import { FREE_CHAT_ID } from '@/lib/stages';
 import { LANGUAGES, type Language } from '@/lib/translations';
+import { loadMemory } from '@/lib/business-memory';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -102,9 +103,10 @@ export async function POST(request: NextRequest) {
     const usage = await getUsage(userId);
     if (!usage.weeklyReview) return NextResponse.json({ error: 'plan_required' }, { status: 403 });
 
-    const [genoma, progress, previous] = await Promise.all([
+    const [genoma, progress, memory, previous] = await Promise.all([
       loadLatestGenoma(userId),
       loadProgress(userId),
+      loadMemory(userId),
       db().chatSession.findFirst({
         where: { userId, title: { startsWith: 'revision:' } },
         orderBy: { createdAt: 'desc' },
@@ -131,6 +133,7 @@ export async function POST(request: NextRequest) {
       completed: progress.completed,
       summaries: progress.summaries,
       brief: WEEKLY_REVIEW_BRIEF,
+      memory,
     });
     userContent = `MIS NÚMEROS DE ESTA SEMANA:\n${describe(metrics)}${
       previousText ? `\n\nSEMANA ANTERIOR:\n${previousText}` : '\n\n(Es mi primera revisión.)'

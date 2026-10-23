@@ -10,11 +10,13 @@ import {
 } from '@/lib/route-progress';
 import { buildSystemPrompt, summaryInstruction } from '@/lib/advisor-prompts';
 import { ADVISOR_MODEL } from '@/lib/claude-stream';
-import { isStageId, STAGE_IDS } from '@/lib/stages';
+import { isStageId, STAGE_IDS, STAGE_TEXT } from '@/lib/stages';
+import { loadMemory, refreshMemory } from '@/lib/business-memory';
 import { LANGUAGES, type Language } from '@/lib/translations';
 
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+// Writing the Contenido deliverable (10 full scripts) can take close to a minute.
+export const maxDuration = 120;
 
 
 /** GET /api/progress → route progress + latest GENOMA answers. */
@@ -79,30 +81,35 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'advisor_unavailable' }, { status: 503 });
       }
 
-      const genoma = await loadLatestGenoma(userId);
+      const [genoma, memory] = await Promise.all([loadLatestGenoma(userId), loadMemory(userId)]);
       const transcript = rows
         .slice(-40)
         .map((m) => `${m.role === 'assistant' ? 'ASESOR' : 'USUARIO'}: ${m.content}`)
         .join('\n\n');
 
       const client = new Anthropic();
-      const response = await client.messages.create({
-        model: ADVISOR_MODEL,
-        max_tokens: 1500,
-        system: buildSystemPrompt({
-          stage,
-          language,
-          genoma,
-          completed: progress.completed,
-          summaries: progress.summaries,
+      // The deliverable and the fact sheet are written at the same time.
+      const [response] = await Promise.all([
+        client.messages.create({
+          model: ADVISOR_MODEL,
+          max_tokens: stage === 'contenido' ? 6000 : 1500,
+          system: buildSystemPrompt({
+            stage,
+            language,
+            genoma,
+            completed: progress.completed,
+            summaries: progress.summaries,
+            memory,
+          }),
+          messages: [
+            {
+              role: 'user',
+              content: `CONVERSACIÓN DE LA ETAPA:\n\n${transcript}\n\n---\n${summaryInstruction(language, stage)}`,
+            },
+          ],
         }),
-        messages: [
-          {
-            role: 'user',
-            content: `CONVERSACIÓN DE LA ETAPA:\n\n${transcript}\n\n---\n${summaryInstruction(language)}`,
-          },
-        ],
-      });
+        refreshMemory(userId, STAGE_TEXT.es[stage].title, rows.slice(-16)),
+      ]);
       const summary = response.content
         .map((block) => (block.type === 'text' ? block.text : ''))
         .join('')

@@ -64,7 +64,7 @@ export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
     contenido: {
       title: 'Contenido que atrae',
       goal: 'Prepara tu perfil y tus primeros videos para atraer clientes.',
-      deliverables: ['Perfil optimizado', '10 ideas de contenido', '3 guiones listos para grabar'],
+      deliverables: ['Perfil optimizado', '10 ideas de contenido', '10 guiones listos para grabar'],
     },
     captacion: {
       title: 'Captación de clientes',
@@ -106,7 +106,7 @@ export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
     contenido: {
       title: 'Content that attracts',
       goal: 'Get your profile and first videos ready to attract clients.',
-      deliverables: ['Optimized profile', '10 content ideas', '3 ready-to-film scripts'],
+      deliverables: ['Optimized profile', '10 content ideas', '10 ready-to-film scripts'],
     },
     captacion: {
       title: 'Client acquisition',
@@ -148,7 +148,7 @@ export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
     contenido: {
       title: 'Привлекающий контент',
       goal: 'Подготовьте профиль и первые видео, чтобы привлекать клиентов.',
-      deliverables: ['Оптимизированный профиль', '10 идей контента', '3 готовых сценария'],
+      deliverables: ['Оптимизированный профиль', '10 идей контента', '10 готовых сценариев'],
     },
     captacion: {
       title: 'Привлечение клиентов',
@@ -190,7 +190,7 @@ export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
     contenido: {
       title: 'Çeken içerik',
       goal: 'Profilinizi ve ilk videolarınızı müşteri çekecek şekilde hazırlayın.',
-      deliverables: ['Optimize edilmiş profil', '10 içerik fikri', 'Çekime hazır 3 senaryo'],
+      deliverables: ['Optimize edilmiş profil', '10 içerik fikri', 'Çekime hazır 10 senaryo'],
     },
     captacion: {
       title: 'Müşteri kazanımı',
@@ -232,7 +232,7 @@ export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
     contenido: {
       title: 'Cəlb edən kontent',
       goal: 'Profilinizi və ilk videolarınızı müştəri cəlb etmək üçün hazırlayın.',
-      deliverables: ['Optimallaşdırılmış profil', '10 kontent ideyası', 'Çəkilişə hazır 3 ssenari'],
+      deliverables: ['Optimallaşdırılmış profil', '10 kontent ideyası', 'Çəkilişə hazır 10 ssenari'],
     },
     captacion: {
       title: 'Müştəri cəlbi',

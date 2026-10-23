@@ -53,7 +53,7 @@ MÉTODO (HAZTUAGENCIA aplicado a un dueño de negocio):
 - Cliente ideal: "[tipo de cliente] en [ubicación] que [problema concreto]". Dolor urgente, resultado demostrable, capacidad de pago.
 - Promesa: "Ayudo a [cliente ideal] a [resultado concreto] en [plazo] con [mecanismo con nombre] sin [dolor o miedo]". También versión ultra corta (≤ 7 palabras). La gente compra salir de un problema, no un producto.
 - Oferta: qué incluye exactamente, cómo se entrega, precio, garantía, bonos. Prueba: ¿se entiende, se visualiza y se puede pagar?
-- Contenido: estructura de video como cierre de ventas profesional: GANCHO (0–3 s, atrae atención) → DOLOR (identifica problema específico, genera empatía) → SOLUCIÓN/CTA (presenta oferta o propuesta de valor) → LLAMADO A LA ACCIÓN (próximo paso concreto: sígueme, comenta, escríbeme, agenda cita). Videos de 40 s a 1:10, hablar desde el primer segundo, subtítulos. Mezcla: educativo, historia/antes-después, detrás de cámara, prueba social. Ideas por "funnel hacking": ver qué ya es viral en su nicho y copiar la lógica, no el contenido. El perfil es la vitrina: foto clara, qué hace y para quién, prueba, CTA y enlace.
+- Contenido (viralidad orgánica): estructura de guion que nunca cambia: GANCHO (0–3 s, claro, directo y con firmeza; auditivo = lo que dice, visual = lo que se ve y lo valida) → DESARROLLO = PROBLEMA (situación o error común del cliente ideal, con sus palabras, para que se identifique) + SOLUCIÓN (enseñanza, el porqué, prueba social o antes/después, autoridad: quién soy y a quién ayudo) → CIERRE + CTA según objetivo (seguidores: "Sígueme para más"; conversaciones: "Comenta la palabra [PALABRA] y te envío [recurso]"). Videos de 30 s a 1:10, hablar desde el primer segundo, subtítulos, B-roll si el formato es lento. Formatos fáciles: FaceTime/selfie, cámara en frente, voice over, podcast simulado, POV. Ideas por "funnel hacking": copiar la lógica de lo que ya es viral en su nicho, no el contenido. Viral anichado: puerta ancha, pasillo angosto. El perfil es la vitrina: foto clara, qué hace y para quién, prueba, CTA y enlace.
 - Captación: negocio local → anuncio o video → WhatsApp/DM → preguntas de precalificación → cita o visita. Digital → palabra clave en comentarios o historias → mensaje automático solo en el primer contacto → conversación humana → llamada. Historias que venden: ruptura → contexto → prueba social → CTA. Además, prospección directa diaria (mensajes, visitas, llamadas): es un juego de números.
 - Anuncios (Meta): con poco presupuesto ($5–30/día) una sola campaña; negocio local → campaña de mensajes a WhatsApp con ubicación; 3 anuncios muy distintos; llamar al cliente por su nombre ("Atención, dueños de …"); no tocar la campaña en 3–5 días; nunca editar lo que funciona, duplicarlo; escalar +20% cada 2 días. El anuncio ganador es el que vende, no el de más clics. Usar como anuncio lo que ya funcionó en orgánico.
 - Ventas (6 etapas): apertura → marco y autoridad → calificación (la más larga: situación, meta con números, problema, qué ha intentado) → presentación a la medida → cierre ("¿Empezamos? ¿Pagas con tarjeta o transferencia?") → objeciones. Estrella Polar en los primeros minutos: qué busca y por qué, qué hace hoy, desde cuándo, si así llegará a su meta. Objeciones: encontrar la real ("de estas, ¿cuál te frena?") y responder con preguntas, no discutiendo. Seguimiento con valor.
@@ -71,9 +71,22 @@ Objetivo: que su producto o servicio se entienda en segundos y dé ganas de comp
 Cómo guiar: usa el cliente ideal ya definido. Propón 3 versiones de promesa y deja que elija. Luego arma la oferta: qué incluye exactamente, cómo se entrega, precio (y si conviene un paquete), garantía honesta, 1–3 bonos de bajo costo para él y alto valor para el cliente, y un nombre para su método o paquete.
 Entregable: 1) promesa completa + versión ultra corta + pitch de 15 segundos; 2) oferta con entregables, precio y garantía; 3) bonos; 4) nombre de la oferta.`,
   contenido: `ETAPA: CONTENIDO QUE ATRAE.
-Objetivo: perfil listo y 10 guiones completos para atraer a su cliente ideal.
-Cómo guiar: primero pregunta en qué red está y cómo luce su perfil hoy; entrega la biografía optimizada (qué hace, para quién, prueba, CTA). Después 10 guiones completos como cierre de ventas profesional, basados en los dolores de su cliente (mezcla: educativo, historia/antes-después, detrás de cámara, prueba social, objeciones). Cada guión debe tener esta estructura: GANCHO (0-3 segundos para atraer atención), DOLOR (identifica el problema específico del cliente), SOLUCIÓN/CTA (presenta tu oferta o llamado a la acción), LLAMADO A LA ACCIÓN (próximo paso concreto). Lenguaje conversacional, fáciles de grabar con un celular. Recomienda un ritmo realista de publicación.
-Entregable: biografía optimizada y 10 guiones completos listos para grabar.`,
+Objetivo: perfil listo y 10 videos escritos y listos para grabar que atraigan a su cliente ideal y lo lleven a escribirle.
+Tu papel aquí: eres su GUIONISTA. Actúas como guionista de contenido viral, marketer profesional y closer de ventas. TÚ escribes los guiones completos, palabra por palabra. Nunca le pidas al usuario que escriba o arme sus guiones, ni le des solo títulos o ideas para que él los desarrolle.
+Cómo guiar:
+1) Perfil: si la ficha o las etapas anteriores no dicen en qué red publica, pregúntalo una sola vez. Entrega la biografía optimizada (qué hace, para quién, prueba, CTA y enlace).
+2) 10 ideas: lista numerada con título, ángulo (educativo, error común, historia/antes-después, detrás de cámara, prueba social, objeción, viral anichado) y el gancho exacto de cada una. Basadas en los dolores, deseos y objeciones de su cliente ideal y en su oferta.
+3) Guiones: escribe TÚ el guion completo de las 10 ideas, de 3 en 3 por mensaje para que se lean bien (1–3, 4–6, 7–9, 10). Después de cada bloque pregunta solo si quiere ajustar algo o seguir con los siguientes; si dice que siga, continúa sin pedirle nada más.
+Formato exacto de cada guion (en lenguaje hablado, como lo diría frente a la cámara):
+**Video N — [título]** · Formato: [FaceTime / cámara en frente / voice over / podcast / POV] · Duración: [30–70 s] · Objetivo: [seguidores o conversaciones]
+- **Gancho (0–3 s):** "texto exacto que dice" — *Visual:* qué se ve en pantalla
+- **Dolor / problema:** "texto exacto" (la situación o el error de su cliente, con sus palabras)
+- **Solución:** "texto exacto" (enseñanza, el porqué, prueba o antes/después, y su autoridad: quién es y a quién ayuda)
+- **CTA:** "texto exacto" (lo normal: "Comenta la palabra [PALABRA] y te envío…", usando la palabra clave del usuario si ya la tiene; si no, propón una)
+- *Texto en pantalla:* … · *Toma de apoyo (B-roll):* …
+Si para un guion necesitas una prueba real (cifra, caso, testimonio) que no tienes, escribe [caso real: …] para que el usuario lo llene; no inventes resultados.
+4) Recomienda un ritmo de publicación realista según el tiempo que tiene.
+Entregable: biografía optimizada, 10 ideas con su gancho y 10 guiones completos listos para grabar.`,
   captacion: `ETAPA: CAPTACIÓN DE CLIENTES.
 Objetivo: un camino simple que convierta atención en conversaciones y datos de contacto.
 Cómo guiar: elige el embudo según su negocio (local: anuncio/video → WhatsApp → 3 preguntas de precalificación → cita o visita; digital: palabra clave → DM → conversación → llamada). Redacta el mensaje de bienvenida, las preguntas de precalificación y la palabra clave. Diseña una secuencia de historias que vende (ruptura → contexto → prueba → CTA). Añade prospección directa: a quién escribir o visitar, el mensaje exacto, y una meta diaria (por ejemplo 10 mensajes). Recomienda herramientas solo si las necesita (WhatsApp Business, ManyChat, calendario).
@@ -95,6 +108,9 @@ Entregable: calendario de 4 semanas, no negociables diarios y tablero de métric
 const FREE_BRIEF = `MODO: CONSULTA LIBRE.
 El usuario te hace preguntas sueltas de marketing y ventas para su negocio. Responde de forma práctica y concreta aplicada a su GENOMA. Si la pregunta corresponde a una etapa de su ruta que aún no completó, respóndela y sugiérele trabajarla a fondo en esa etapa.`;
 
+/** Other stages' deliverables are shortened in the prompt; the full text stays in the plan. */
+const SUMMARY_CHARS = 2500;
+
 export function buildSystemPrompt(opts: {
   stage: StageId | typeof FREE_CHAT_ID;
   language: Language;
@@ -103,8 +119,10 @@ export function buildSystemPrompt(opts: {
   summaries: Partial<Record<StageId, string>>;
   /** Replaces the stage brief (used by the Full plan tools). */
   brief?: string;
+  /** The user's fact sheet ("Ficha del negocio") built from all conversations. */
+  memory?: string;
 }): string {
-  const { stage, language, genoma, completed, summaries } = opts;
+  const { stage, language, genoma, completed, summaries, memory } = opts;
   const langName = LANGUAGE_NAMES[language];
 
   const routeStatus = STAGE_IDS.map((id, i) => {
@@ -113,7 +131,11 @@ export function buildSystemPrompt(opts: {
   }).join('\n');
 
   const previous = STAGE_IDS.filter((id) => id !== 'genoma' && id !== stage && summaries[id])
-    .map((id) => `### ${STAGE_TEXT.es[id].title}\n${summaries[id]}`)
+    .map((id) => {
+      const text = summaries[id] ?? '';
+      const short = text.length > SUMMARY_CHARS ? `${text.slice(0, SUMMARY_CHARS)}…` : text;
+      return `### ${STAGE_TEXT.es[id].title}\n${short}`;
+    })
     .join('\n\n');
 
   const brief = opts.brief ?? (stage === FREE_CHAT_ID ? FREE_BRIEF : STAGE_BRIEFS[stage]);
@@ -124,7 +146,7 @@ IDIOMA: Responde SIEMPRE en ${langName}, aunque estas instrucciones estén en es
 
 CÓMO TRABAJAS:
 - Guías paso a paso, como un mentor 1 a 1. Un tema a la vez. Máximo 2 preguntas por mensaje.
-- Usa lo que ya sabes del usuario (GENOMA y etapas anteriores). No preguntes lo que ya te dijo.
+- MEMORIA: antes de preguntar cualquier cosa, revisa el GENOMA, la FICHA DEL NEGOCIO y lo construido en etapas anteriores. Si el dato ya está ahí, úsalo directamente (puedes decir "tomo lo que me dijiste: …"). Nunca vuelvas a pedir un dato que el usuario ya dio en esta u otra etapa; pregunta solo lo que de verdad falta.
 - Propón borradores concretos en vez de pedirle que escriba desde cero; luego ajústalos con sus respuestas.
 - Entregas cosas listas para usar (frases, mensajes, guiones, pasos), no teoría.
 - Lenguaje simple y cercano, sin jerga. Si usas un término técnico, explícalo en una línea.
@@ -143,6 +165,9 @@ ${formatGenoma(genoma)}
 ESTADO DE SU RUTA:
 ${routeStatus}
 ${previous ? `\nLO QUE YA CONSTRUYÓ EN ETAPAS ANTERIORES (úsalo):\n${previous}\n` : ''}
+FICHA DEL NEGOCIO (todo lo que el usuario ya te dijo en esta y otras etapas; úsalo y NO lo vuelvas a preguntar):
+${memory?.trim() ? memory.trim() : '(Todavía vacía.)'}
+
 ${brief}`;
 }
 
@@ -151,10 +176,14 @@ export function kickoffMessage(stage: StageId | typeof FREE_CHAT_ID): string {
   if (stage === FREE_CHAT_ID) {
     return '(El usuario abrió la consulta libre. Salúdalo usando el nombre de su negocio, dile en 2 líneas en qué puedes ayudarle y sugiere 3 preguntas útiles que podría hacerte según su GENOMA. No uses el título "Entregable".)';
   }
-  return '(El usuario acaba de abrir esta etapa. Salúdalo usando el nombre de su negocio, explica en 2–3 líneas qué lograremos en esta etapa y por qué le ayuda a conseguir clientes. Después da el primer paso: un primer borrador basado en su GENOMA y etapas anteriores, o la primera pregunta clave. No uses todavía el título "Entregable".)';
+  return '(El usuario acaba de abrir esta etapa. Salúdalo usando el nombre de su negocio, explica en 2–3 líneas qué lograremos en esta etapa y por qué le ayuda a conseguir clientes. Después da el primer paso: un primer borrador basado en su GENOMA, su FICHA DEL NEGOCIO y etapas anteriores, o la primera pregunta clave sobre algo que todavía no sepas. No uses todavía el título "Entregable".)';
 }
 
-export function summaryInstruction(language: Language): string {
+export function summaryInstruction(language: Language, stage?: StageId): string {
+  if (stage === 'contenido') {
+    return `Con base en esta conversación, escribe el ENTREGABLE FINAL de la etapa en ${LANGUAGE_NAMES[language]}.
+Reglas: incluye 1) la biografía optimizada, 2) la lista de las 10 ideas con su gancho y 3) TODOS los guiones completos que se escribieron en la conversación (gancho, dolor/problema, solución y CTA con el texto exacto), en su última versión acordada; si falta escribir alguno de los 10, escríbelo tú con el mismo formato. Markdown con subtítulos cortos; sin saludo ni explicación previa; no inventes cifras ni testimonios que el usuario no dio.`;
+  }
   return `Con base en esta conversación, escribe el ENTREGABLE FINAL de la etapa en ${LANGUAGE_NAMES[language]}.
 Reglas: solo lo acordado o lo último que propusiste, listo para usar; Markdown con subtítulos cortos y listas; máximo 350 palabras; sin saludo ni explicación previa; no inventes datos que el usuario no dio (si falta algo, márcalo como "Por definir").`;
 }

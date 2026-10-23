@@ -53,9 +53,19 @@ export async function saveProgress(userId: string, progress: RouteProgress): Pro
     profile?.genoma && typeof profile.genoma === 'object' && !Array.isArray(profile.genoma)
       ? (profile.genoma as Record<string, unknown>)
       : {};
+  // Keep other route fields (such as the advisor's memory) that live next to the progress.
+  const previousRoute =
+    base.route && typeof base.route === 'object' && !Array.isArray(base.route)
+      ? (base.route as Record<string, unknown>)
+      : {};
   const value = {
     ...base,
-    route: { ...progress, updatedAt: new Date().toISOString() },
+    route: {
+      ...previousRoute,
+      completed: progress.completed,
+      summaries: progress.summaries,
+      updatedAt: new Date().toISOString(),
+    },
   } as unknown as Prisma.InputJsonValue;
 
   await db().profile.upsert({

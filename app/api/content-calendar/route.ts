@@ -7,6 +7,7 @@ import { streamClaude } from '@/lib/claude-stream';
 import { FREE_CHAT_ID } from '@/lib/stages';
 import { PLANS, monthKey } from '@/lib/plans';
 import { LANGUAGES, type Language } from '@/lib/translations';
+import { loadMemory } from '@/lib/business-memory';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -71,7 +72,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'generation_limit' }, { status: 429 });
     }
 
-    const [genoma, progress] = await Promise.all([loadLatestGenoma(userId), loadProgress(userId)]);
+    const [genoma, progress, memory] = await Promise.all([
+      loadLatestGenoma(userId),
+      loadProgress(userId),
+      loadMemory(userId),
+    ]);
     if (!genoma) return NextResponse.json({ error: 'no_genoma' }, { status: 400 });
 
     system = buildSystemPrompt({
@@ -81,6 +86,7 @@ export async function POST(request: NextRequest) {
       completed: progress.completed,
       summaries: progress.summaries,
       brief: CONTENT_CALENDAR_BRIEF,
+      memory,
     });
     sessionId =
       calendar.sessionId ??
