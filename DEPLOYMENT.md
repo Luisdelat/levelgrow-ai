@@ -65,7 +65,7 @@ NEXT_PUBLIC_CLAUDE_API_KEY = [Tu Claude API Key]
 1. Registrarse con email/contraseña
 2. Seleccionar plan ($49 o $99)
 3. Completar GENOMA (8 preguntas)
-4. Chat IA personalizado basado en HTA
+4. Chat IA personalizado basado en el Método LEVELGROW
 5. Pagos con PayPal
 
 ---

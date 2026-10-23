@@ -1,6 +1,6 @@
 # LEVELGROW AI - Marketing Automation Platform
 
-Platform comercial de asistente de marketing basada en la metodología HTA de HAZTUAGENCIA.
+Platform comercial de asistente de marketing basada en el Método LEVELGROW.
 
 ## Stack Tecnológico
 
@@ -157,7 +157,7 @@ levelgrow-ai/
 - Chat en tiempo real con Claude
 - Contexto personalizado por GENOMA
 - Historial de conversaciones
-- Respuestas basadas en HTA
+- Respuestas basadas en el Método LEVELGROW
 
 ### 4. Plan de Acciones
 - Acciones personalizadas

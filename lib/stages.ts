@@ -1,7 +1,7 @@
 import type { Language } from './translations';
 
 /**
- * The guided growth route, based on the HAZTUAGENCIA (HTA) method:
+ * The guided growth route of the LEVELGROW method:
  * GENOMA (ideal client -> promise -> offer -> sales script), then traffic
  * (organic + paid), a capture funnel, sales, and a 30-day execution plan.
  */

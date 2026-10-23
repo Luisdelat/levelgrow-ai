@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "LEVELGROW AI - Marketing Automation",
-  description: "AI-powered marketing assistant based on HTA methodology",
+  description: "AI marketing advisor that guides business owners step by step to get clients and sell more",
 };
 
 export default function RootLayout({
