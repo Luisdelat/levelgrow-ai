@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import AppShell from '@/components/AppShell';
+import DownloadPdfButton from '@/components/DownloadPdfButton';
 import { useLanguage } from '@/lib/useLanguage';
 import { APP_TEXT, fill, type AppText } from '@/lib/app-text';
 import { STAGE_IDS, STAGE_TEXT, stageHref, type StageId } from '@/lib/stages';
@@ -61,12 +62,36 @@ function PlanContent() {
 
   const advisorStages = STAGE_IDS.filter((id): id is Exclude<StageId, 'genoma'> => id !== 'genoma');
   const hasAny = advisorStages.some((id) => progress.summaries[id]);
+  const businessName = progress.genoma?.businessName?.trim() || undefined;
+  const stageKicker = (id: StageId) => fill(T.stageOf, { n: STAGE_IDS.indexOf(id) + 1, total: STAGE_IDS.length });
+
+  // The full plan PDF: GENOMA answers first, then every finished deliverable in route order.
+  const genomaMarkdown = GENOMA_FIELDS.filter((f) => progress.genoma?.[f.key]?.trim())
+    .map((f) => `- **${T[f.label] as string}:** ${progress.genoma?.[f.key]?.trim().replace(/\n+/g, ' ')}`)
+    .join('\n');
+  const fullPlanSections = [
+    ...(genomaMarkdown ? [{ kicker: stageKicker('genoma'), heading: S.genoma.title, markdown: genomaMarkdown }] : []),
+    ...advisorStages
+      .filter((id) => progress.summaries[id])
+      .map((id) => ({ kicker: stageKicker(id), heading: S[id].title, markdown: progress.summaries[id] ?? '' })),
+  ];
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <header className="rise-in">
-        <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">{T.planTitle}</h1>
-        <p className="mt-2 text-slate-400">{T.planSub}</p>
+      <header className="rise-in flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">{T.planTitle}</h1>
+          <p className="mt-2 text-slate-400">{T.planSub}</p>
+        </div>
+        {hasAny && (
+          <DownloadPdfButton
+            variant="accent"
+            label={T.downloadFullPlan}
+            title={T.pdfFullPlanTitle}
+            businessName={businessName}
+            sections={fullPlanSections}
+          />
+        )}
       </header>
 
       {progress.genoma && (
@@ -111,6 +136,11 @@ function PlanContent() {
               </div>
               <div className="flex items-center gap-2">
                 <CopyButton text={summary} labels={{ copy: T.copy, copied: T.copied }} />
+                <DownloadPdfButton
+                  title={`${T.pdfDeliverable}: ${S[id].title}`}
+                  businessName={businessName}
+                  sections={[{ markdown: summary }]}
+                />
                 <Link href={stageHref(id)} className="rounded-md px-2.5 py-1 text-xs text-blue-400 hover:text-blue-300">
                   {T.review}
                 </Link>

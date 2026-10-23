@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import DownloadPdfButton from '@/components/DownloadPdfButton';
 import remarkGfm from 'remark-gfm';
 import AppShell from '@/components/AppShell';
 import FullPlanLock from '@/components/FullPlanLock';
@@ -123,7 +124,8 @@ function ContentCalendar() {
       {shown ? (
         <article className="panel rise-in p-6 sm:p-8">
           {!busy && (
-            <div className="mb-2 flex justify-end">
+            <div className="mb-2 flex flex-wrap items-start justify-end gap-2">
+              <DownloadPdfButton title={T.pdfCalendarTitle} sections={[{ markdown: calendar.content ?? '' }]} />
               <button
                 onClick={copy}
                 className="rounded-md border border-slate-700 px-2.5 py-1 text-xs text-slate-300 hover:border-slate-600 hover:text-white"

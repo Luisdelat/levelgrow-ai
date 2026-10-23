@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import DownloadPdfButton from '@/components/DownloadPdfButton';
 import remarkGfm from 'remark-gfm';
 import AppShell from '@/components/AppShell';
 import FullPlanLock from '@/components/FullPlanLock';
@@ -168,7 +169,19 @@ function WeeklyReview() {
                 ))}
               </span>
             </summary>
-            <div className="advisor-md mt-4 border-t border-slate-800 pt-4">
+            <div className="mt-4 flex justify-end border-t border-slate-800 pt-4">
+              <DownloadPdfButton
+                title={`${T.pdfReviewTitle} · ${fill(T.weekOf, { date: formatDate(r.date) })}`}
+                sections={[
+                  {
+                    markdown: `${FIELDS.filter((f) => r.metrics[f.key] !== undefined)
+                      .map((f) => `- **${T[f.label] as string}:** ${String(r.metrics[f.key])}`)
+                      .join('\n')}\n\n${r.analysis}`,
+                  },
+                ]}
+              />
+            </div>
+            <div className="advisor-md mt-2">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{r.analysis}</ReactMarkdown>
             </div>
           </details>

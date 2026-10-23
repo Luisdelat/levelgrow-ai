@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import AppShell from '@/components/AppShell';
 import AdvisorChat from '@/components/AdvisorChat';
+import DownloadPdfButton from '@/components/DownloadPdfButton';
 import { useLanguage } from '@/lib/useLanguage';
 import { APP_TEXT, fill } from '@/lib/app-text';
 import { STAGE_IDS, STAGE_TEXT, isStageId, nextStage, stageHref, type StageId } from '@/lib/stages';
@@ -169,11 +170,19 @@ function StageContent({ stage }: { stage: StageId }) {
           <div className="panel rise-in border-emerald-500/25 p-6">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-semibold text-white">{T.yourDeliverable}</h2>
-              {following && (
-                <button onClick={() => router.push(stageHref(following))} className="btn-accent">
-                  {T.goNext}: {S[following].title} <span aria-hidden="true">→</span>
-                </button>
-              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <DownloadPdfButton
+                  variant="quiet"
+                  title={`${T.pdfDeliverable}: ${S[stage].title}`}
+                  businessName={progress.genoma?.businessName?.trim() || undefined}
+                  sections={[{ markdown: summary }]}
+                />
+                {following && (
+                  <button onClick={() => router.push(stageHref(following))} className="btn-accent">
+                    {T.goNext}: {S[following].title} <span aria-hidden="true">→</span>
+                  </button>
+                )}
+              </div>
             </div>
             <div className="advisor-md">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{summary}</ReactMarkdown>
