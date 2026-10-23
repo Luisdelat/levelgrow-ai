@@ -94,7 +94,11 @@ function DashboardContent() {
                   </span>
                 </span>
                 <span className="tabular-nums text-slate-300">
-                  {fill(T.usageCount, { used: usage.used, limit: usage.limit.toLocaleString() })}
+                  {fill(T.usageCount, {
+                    used: usage.used,
+                    limit: usage.limit.toLocaleString(),
+                    left: Math.max(usage.limit - usage.used, 0).toLocaleString(),
+                  })}
                 </span>
               </div>
             )}

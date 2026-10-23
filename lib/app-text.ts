@@ -134,8 +134,8 @@ const es = {
   required: 'obligatorio',
 
 
-  usageLabel: "Mensajes con tu asesor este mes",
-  usageCount: "{used} de {limit}",
+  usageLabel: "Mensajes usados este mes",
+  usageCount: "{used} de {limit} · te quedan {left}",
   limitBasic: "Llegaste a tus {limit} mensajes de este mes; se renuevan el día 1. El Plan Full incluye 1,000 mensajes al mes.",
   limitFull: "Llegaste a tus {limit} mensajes de este mes; se renuevan el día 1.",
   fullBadge: "Plan Full",
@@ -351,8 +351,8 @@ const en: AppText = {
   required: 'required',
 
 
-  usageLabel: "Advisor messages this month",
-  usageCount: "{used} of {limit}",
+  usageLabel: "Messages used this month",
+  usageCount: "{used} of {limit} · {left} left",
   limitBasic: "You reached your {limit} messages for this month; they reset on the 1st. The Full Plan includes 1,000 messages a month.",
   limitFull: "You reached your {limit} messages for this month; they reset on the 1st.",
   fullBadge: "Full Plan",
@@ -566,8 +566,8 @@ const ru: AppText = {
   required: 'обязательно',
 
 
-  usageLabel: "Сообщений консультанту в этом месяце",
-  usageCount: "{used} из {limit}",
+  usageLabel: "Использовано сообщений в этом месяце",
+  usageCount: "{used} из {limit} · осталось {left}",
   limitBasic: "Вы использовали {limit} сообщений в этом месяце; лимит обновится 1-го числа. В Полном плане — 1000 сообщений в месяц.",
   limitFull: "Вы использовали {limit} сообщений в этом месяце; лимит обновится 1-го числа.",
   fullBadge: "Полный план",
@@ -781,8 +781,8 @@ const tr: AppText = {
   required: 'zorunlu',
 
 
-  usageLabel: "Bu ay danışmana gönderilen mesajlar",
-  usageCount: "{used} / {limit}",
+  usageLabel: "Bu ay kullanılan mesajlar",
+  usageCount: "{used} / {limit} · {left} kaldı",
   limitBasic: "Bu ayki {limit} mesaj hakkınızı doldurdunuz; ayın 1'inde yenilenir. Tam Plan ayda 1.000 mesaj içerir.",
   limitFull: "Bu ayki {limit} mesaj hakkınızı doldurdunuz; ayın 1'inde yenilenir.",
   fullBadge: "Tam Plan",
@@ -996,8 +996,8 @@ const az: AppText = {
   required: 'vacib',
 
 
-  usageLabel: "Bu ay məsləhətçiyə göndərilən mesajlar",
-  usageCount: "{used} / {limit}",
+  usageLabel: "Bu ay istifadə olunan mesajlar",
+  usageCount: "{used} / {limit} · {left} qalıb",
   limitBasic: "Bu ay üçün {limit} mesaj limitinizi doldurdunuz; ayın 1-də yenilənir. Tam Paketə ayda 1000 mesaj daxildir.",
   limitFull: "Bu ay üçün {limit} mesaj limitinizi doldurdunuz; ayın 1-də yenilənir.",
   fullBadge: "Tam Paket",
