@@ -111,9 +111,13 @@ function Checkout() {
               setError(T.paymentError);
               return;
             }
+            const result = (await res.json().catch(() => ({}))) as { plan?: string; replaced?: boolean };
             setStatus('done');
             await refresh();
-            router.push('/dashboard');
+            // Thank-you page: confirms the payment and shows the first steps.
+            const query = new URLSearchParams({ plan: result.plan === 'full' ? 'full' : 'basic' });
+            if (result.replaced) query.set('upgrade', '1');
+            router.push(`/dashboard/bienvenida?${query}`);
           },
           onError: (err: unknown) => {
             console.error('PayPal error', err);

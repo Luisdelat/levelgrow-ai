@@ -51,11 +51,12 @@ export async function POST(request: NextRequest) {
     await db().user.update({ where: { id: userId }, data: { plan } });
 
     // Changing plan: stop billing the old PayPal subscription.
-    if (
+    const replaced = Boolean(
       previous?.paypalSubscriptionId &&
-      previous.paypalSubscriptionId !== subscriptionId &&
-      previous.status === 'active'
-    ) {
+        previous.paypalSubscriptionId !== subscriptionId &&
+        previous.status === 'active',
+    );
+    if (replaced && previous?.paypalSubscriptionId) {
       try {
         await cancelSubscription(previous.paypalSubscriptionId, 'Changed to another LEVELGROW AI plan');
       } catch (error) {
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ ok: true, plan });
+    return NextResponse.json({ ok: true, plan, replaced });
   } catch (error) {
     console.error('PayPal activate error:', error);
     return NextResponse.json({ error: 'paypal_error' }, { status: 502 });
