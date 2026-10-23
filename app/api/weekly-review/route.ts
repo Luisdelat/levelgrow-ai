@@ -134,6 +134,8 @@ export async function POST(request: NextRequest) {
       summaries: progress.summaries,
       brief: WEEKLY_REVIEW_BRIEF,
       memory,
+      // Only Full plan users reach this tool.
+      plan: 'full',
     });
     userContent = `MIS NÚMEROS DE ESTA SEMANA:\n${describe(metrics)}${
       previousText ? `\n\nSEMANA ANTERIOR:\n${previousText}` : '\n\n(Es mi primera revisión.)'

@@ -3,6 +3,7 @@
 // to market their own business (not for agencies).
 
 import type { Language } from './translations';
+import type { PlanId } from './plans';
 import { LANGUAGE_NAMES, STAGE_TEXT, STAGE_IDS, type StageId, FREE_CHAT_ID } from './stages';
 
 export type GenomaData = Record<string, unknown>;
@@ -76,7 +77,7 @@ Tu papel aquí: eres su GUIONISTA. Actúas como guionista de contenido viral, ma
 Cómo guiar:
 1) Perfil: si la ficha o las etapas anteriores no dicen en qué red publica, pregúntalo una sola vez. Entrega la biografía optimizada (qué hace, para quién, prueba, CTA y enlace).
 2) 10 ideas: lista numerada con título, ángulo (educativo, error común, historia/antes-después, detrás de cámara, prueba social, objeción, viral anichado) y el gancho exacto de cada una. Basadas en los dolores, deseos y objeciones de su cliente ideal y en su oferta.
-3) Guiones: escribe TÚ el guion completo de las 10 ideas, de 3 en 3 por mensaje para que se lean bien (1–3, 4–6, 7–9, 10). Después de cada bloque pregunta solo si quiere ajustar algo o seguir con los siguientes; si dice que siga, continúa sin pedirle nada más.
+3) Guiones: {{SCRIPTS_STEP}}
 Formato exacto de cada guion (en lenguaje hablado, como lo diría frente a la cámara):
 **Video N — [título]** · Formato: [FaceTime / cámara en frente / voice over / podcast / POV] · Duración: [30–70 s] · Objetivo: [seguidores o conversaciones]
 - **Gancho (0–3 s):** "texto exacto que dice" — *Visual:* qué se ve en pantalla
@@ -86,7 +87,7 @@ Formato exacto de cada guion (en lenguaje hablado, como lo diría frente a la c�
 - *Texto en pantalla:* … · *Toma de apoyo (B-roll):* …
 Si para un guion necesitas una prueba real (cifra, caso, testimonio) que no tienes, escribe [caso real: …] para que el usuario lo llene; no inventes resultados.
 4) Recomienda un ritmo de publicación realista según el tiempo que tiene.
-Entregable: biografía optimizada, 10 ideas con su gancho y 10 guiones completos listos para grabar.`,
+Entregable: biografía optimizada, 10 ideas con su gancho y {{SCRIPTS_DELIVERABLE}}.`,
   captacion: `ETAPA: CAPTACIÓN DE CLIENTES.
 Objetivo: un camino simple que convierta atención en conversaciones y datos de contacto.
 Cómo guiar: elige el embudo según su negocio (local: anuncio/video → WhatsApp → 3 preguntas de precalificación → cita o visita; digital: palabra clave → DM → conversación → llamada). Redacta el mensaje de bienvenida, las preguntas de precalificación y la palabra clave. Diseña una secuencia de historias que vende (ruptura → contexto → prueba → CTA). Añade prospección directa: a quién escribir o visitar, el mensaje exacto, y una meta diaria (por ejemplo 10 mensajes). Recomienda herramientas solo si las necesita (WhatsApp Business, ManyChat, calendario).
@@ -108,6 +109,34 @@ Entregable: calendario de 4 semanas, no negociables diarios y tablero de métric
 const FREE_BRIEF = `MODO: CONSULTA LIBRE.
 El usuario te hace preguntas sueltas de marketing y ventas para su negocio. Responde de forma práctica y concreta aplicada a su GENOMA. Si la pregunta corresponde a una etapa de su ruta que aún no completó, respóndela y sugiérele trabajarla a fondo en esa etapa.`;
 
+/** How many full scripts the Contenido stage writes on each plan. */
+export const SCRIPTS_PER_PLAN: Record<PlanId, number> = { basic: 3, full: 10 };
+
+const SCRIPTS_STEP: Record<PlanId, string> = {
+  full: 'escribe TÚ el guion completo de las 10 ideas, de 3 en 3 por mensaje para que se lean bien (1–3, 4–6, 7–9, 10). Después de cada bloque pregunta solo si quiere ajustar algo o seguir con los siguientes; si dice que siga, continúa sin pedirle nada más.',
+  basic:
+    'su plan Básico incluye 3 guiones completos. Pregúntale cuáles 3 ideas prefiere o recomiéndale las 3 con más potencial para atraer clientes, y escribe TÚ esos 3 guiones completos en un solo mensaje. Las otras 7 ideas quedan en su lista para que las grabe con la misma estructura. Si pide más guiones completos, explícale con amabilidad que los 10 guiones completos vienen en el plan Full.',
+};
+
+const SCRIPTS_DELIVERABLE: Record<PlanId, string> = {
+  full: '10 guiones completos listos para grabar',
+  basic: '3 guiones completos listos para grabar',
+};
+
+const UPGRADE_LINK = '[Mejorar a plan Full](/checkout?plan=full)';
+
+function planSection(plan: PlanId): string {
+  if (plan === 'full') {
+    return 'PLAN DEL USUARIO: Full. Tiene todo incluido: nunca le ofrezcas mejorar de plan.';
+  }
+  return `PLAN DEL USUARIO: Básico ($49/mes).
+El plan Full ($99/mes) incluye además: los 10 guiones completos en la etapa de Contenido (en Básico son 3), un calendario de 30 publicaciones cada mes, la revisión semanal de sus números con el asesor y 1,000 mensajes al mes (en Básico son 200).
+Mejora de plan (natural, en el momento justo):
+- Cuando el usuario se beneficiaría claramente de algo del Full (pide más guiones, pregunta qué publicar cada día, quiere revisar sus números o resultados, o pide un plan de contenido del mes), entrega primero todo lo que su plan incluye y después cierra con UNA línea que conecte su necesidad con el Full e incluya el enlace exacto ${UPGRADE_LINK}. Ejemplo: "Si quieres los 10 guiones listos para grabar, el plan Full los incluye: ${UPGRADE_LINK}".
+- Como máximo una mención por conversación: si ya lo mencionaste en esta conversación, no lo repitas salvo que el usuario pregunte por el plan.
+- Nunca condiciones tu ayuda, no inventes descuentos ni urgencias y no presiones. La recomendación debe sentirse como un consejo útil.`;
+}
+
 /** Other stages' deliverables are shortened in the prompt; the full text stays in the plan. */
 const SUMMARY_CHARS = 2500;
 
@@ -121,8 +150,11 @@ export function buildSystemPrompt(opts: {
   brief?: string;
   /** The user's fact sheet ("Ficha del negocio") built from all conversations. */
   memory?: string;
+  /** Subscription plan: sets how much the advisor delivers and when to suggest upgrading. */
+  plan?: PlanId;
 }): string {
   const { stage, language, genoma, completed, summaries, memory } = opts;
+  const plan: PlanId = opts.plan ?? 'basic';
   const langName = LANGUAGE_NAMES[language];
 
   const routeStatus = STAGE_IDS.map((id, i) => {
@@ -138,7 +170,9 @@ export function buildSystemPrompt(opts: {
     })
     .join('\n\n');
 
-  const brief = opts.brief ?? (stage === FREE_CHAT_ID ? FREE_BRIEF : STAGE_BRIEFS[stage]);
+  const brief = (opts.brief ?? (stage === FREE_CHAT_ID ? FREE_BRIEF : STAGE_BRIEFS[stage]))
+    .replace('{{SCRIPTS_STEP}}', SCRIPTS_STEP[plan])
+    .replace('{{SCRIPTS_DELIVERABLE}}', SCRIPTS_DELIVERABLE[plan]);
 
   return `Eres el Asesor de Marketing de LEVELGROW AI. Eres un mentor experto en marketing y ventas que lleva de la mano a dueños de negocio para conseguir clientes y vender más, usando la metodología HAZTUAGENCIA.
 
@@ -165,6 +199,8 @@ ${formatGenoma(genoma)}
 ESTADO DE SU RUTA:
 ${routeStatus}
 ${previous ? `\nLO QUE YA CONSTRUYÓ EN ETAPAS ANTERIORES (úsalo):\n${previous}\n` : ''}
+${planSection(plan)}
+
 FICHA DEL NEGOCIO (todo lo que el usuario ya te dijo en esta y otras etapas; úsalo y NO lo vuelvas a preguntar):
 ${memory?.trim() ? memory.trim() : '(Todavía vacía.)'}
 
@@ -179,10 +215,11 @@ export function kickoffMessage(stage: StageId | typeof FREE_CHAT_ID): string {
   return '(El usuario acaba de abrir esta etapa. Salúdalo usando el nombre de su negocio, explica en 2–3 líneas qué lograremos en esta etapa y por qué le ayuda a conseguir clientes. Después da el primer paso: un primer borrador basado en su GENOMA, su FICHA DEL NEGOCIO y etapas anteriores, o la primera pregunta clave sobre algo que todavía no sepas. No uses todavía el título "Entregable".)';
 }
 
-export function summaryInstruction(language: Language, stage?: StageId): string {
+export function summaryInstruction(language: Language, stage?: StageId, plan: PlanId = 'basic'): string {
   if (stage === 'contenido') {
+    const n = SCRIPTS_PER_PLAN[plan];
     return `Con base en esta conversación, escribe el ENTREGABLE FINAL de la etapa en ${LANGUAGE_NAMES[language]}.
-Reglas: incluye 1) la biografía optimizada, 2) la lista de las 10 ideas con su gancho y 3) TODOS los guiones completos que se escribieron en la conversación (gancho, dolor/problema, solución y CTA con el texto exacto), en su última versión acordada; si falta escribir alguno de los 10, escríbelo tú con el mismo formato. Markdown con subtítulos cortos; sin saludo ni explicación previa; no inventes cifras ni testimonios que el usuario no dio.`;
+Reglas: incluye 1) la biografía optimizada, 2) la lista de las 10 ideas con su gancho y 3) TODOS los guiones completos que se escribieron en la conversación (gancho, dolor/problema, solución y CTA con el texto exacto), en su última versión acordada; si falta escribir alguno de los ${n} guiones que incluye su plan, escríbelo tú con el mismo formato; no escribas más de ${n} guiones completos. Markdown con subtítulos cortos; sin saludo ni explicación previa; no inventes cifras ni testimonios que el usuario no dio.`;
   }
   return `Con base en esta conversación, escribe el ENTREGABLE FINAL de la etapa en ${LANGUAGE_NAMES[language]}.
 Reglas: solo lo acordado o lo último que propusiste, listo para usar; Markdown con subtítulos cortos y listas; máximo 350 palabras; sin saludo ni explicación previa; no inventes datos que el usuario no dio (si falta algo, márcalo como "Por definir").`;

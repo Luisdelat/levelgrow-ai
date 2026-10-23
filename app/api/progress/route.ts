@@ -12,6 +12,7 @@ import { buildSystemPrompt, summaryInstruction } from '@/lib/advisor-prompts';
 import { ADVISOR_MODEL } from '@/lib/claude-stream';
 import { isStageId, STAGE_IDS, STAGE_TEXT } from '@/lib/stages';
 import { loadMemory, refreshMemory } from '@/lib/business-memory';
+import { planOf } from '@/lib/plans';
 import { LANGUAGES, type Language } from '@/lib/translations';
 
 export const runtime = 'nodejs';
@@ -81,7 +82,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'advisor_unavailable' }, { status: 503 });
       }
 
-      const [genoma, memory] = await Promise.all([loadLatestGenoma(userId), loadMemory(userId)]);
+      const [genoma, memory, user] = await Promise.all([
+        loadLatestGenoma(userId),
+        loadMemory(userId),
+        db().user.findUnique({ where: { id: userId }, select: { plan: true } }),
+      ]);
+      const plan = planOf(user?.plan);
       const transcript = rows
         .slice(-40)
         .map((m) => `${m.role === 'assistant' ? 'ASESOR' : 'USUARIO'}: ${m.content}`)
@@ -101,11 +107,12 @@ export async function POST(request: NextRequest) {
             completed: progress.completed,
             summaries: progress.summaries,
             memory,
+            plan,
           }),
           messages: [
             {
               role: 'user',
-              content: `CONVERSACIÓN DE LA ETAPA:\n\n${transcript}\n\n---\n${summaryInstruction(language, stage)}`,
+              content: `CONVERSACIÓN DE LA ETAPA:\n\n${transcript}\n\n---\n${summaryInstruction(language, stage, plan)}`,
             },
           ],
         }),

@@ -7,6 +7,7 @@ import { streamClaude } from '@/lib/claude-stream';
 import { FREE_CHAT_ID, STAGE_TEXT, isStageId, type StageId } from '@/lib/stages';
 import { LANGUAGES, type Language } from '@/lib/translations';
 import { backfillMemory, loadMemory, refreshMemory } from '@/lib/business-memory';
+import { planOf } from '@/lib/plans';
 
 export const runtime = 'nodejs';
 // Long replies (3 full scripts) plus the background fact-sheet update need more than 60 s.
@@ -114,10 +115,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'already_started' }, { status: 409 });
     }
 
-    const [genoma, progress, savedMemory] = await Promise.all([
+    const [genoma, progress, savedMemory, user] = await Promise.all([
       loadLatestGenoma(userId),
       loadProgress(userId),
       loadMemory(userId),
+      db().user.findUnique({ where: { id: userId }, select: { plan: true } }),
     ]);
     memory = savedMemory;
     systemPrompt = buildSystemPrompt({
@@ -127,6 +129,7 @@ export async function POST(request: NextRequest) {
       completed: progress.completed,
       summaries: progress.summaries,
       memory,
+      plan: planOf(user?.plan),
     });
 
     // On a retry the same user turn is already saved; don't store it twice.

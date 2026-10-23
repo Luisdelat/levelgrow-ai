@@ -8,10 +8,11 @@ import remarkGfm from 'remark-gfm';
 import AppShell from '@/components/AppShell';
 import AdvisorChat from '@/components/AdvisorChat';
 import DownloadPdfButton from '@/components/DownloadPdfButton';
+import UpgradeCard from '@/components/UpgradeCard';
 import { useLanguage } from '@/lib/useLanguage';
 import { APP_TEXT, fill } from '@/lib/app-text';
 import { STAGE_IDS, STAGE_TEXT, isStageId, nextStage, stageHref, type StageId } from '@/lib/stages';
-import { completeStage, fetchProgress, restartStage, type ProgressResponse } from '@/lib/api-client';
+import { completeStage, fetchProgress, fetchUsage, restartStage, type ProgressResponse } from '@/lib/api-client';
 
 function StageContent({ stage }: { stage: StageId }) {
   const router = useRouter();
@@ -27,6 +28,13 @@ function StageContent({ stage }: { stage: StageId }) {
   const [restarting, setRestarting] = useState(false);
   // Changing the key remounts the chat so a restarted stage opens fresh.
   const [chatKey, setChatKey] = useState(0);
+  const [plan, setPlan] = useState<'basic' | 'full' | null>(null);
+
+  useEffect(() => {
+    fetchUsage()
+      .then((u) => setPlan(u.plan))
+      .catch(() => setPlan(null));
+  }, []);
 
   useEffect(() => {
     fetchProgress()
@@ -158,7 +166,7 @@ function StageContent({ stage }: { stage: StageId }) {
           </div>
           <div className="mt-5 flex flex-wrap items-center gap-2">
             <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">{T.whatYouGet}</span>
-            {S[stage].deliverables.map((d) => (
+            {(plan === 'basic' ? (S[stage].basicDeliverables ?? S[stage].deliverables) : S[stage].deliverables).map((d) => (
               <span key={d} className="rounded-full border border-slate-700 bg-slate-950/50 px-3 py-1 text-xs text-slate-300">
                 {d}
               </span>
@@ -218,6 +226,10 @@ function StageContent({ stage }: { stage: StageId }) {
             </button>
           </div>
         </div>
+
+        {plan === 'basic' && stage === 'contenido' && (
+          <UpgradeCard title={T.upsellScriptsTitle} description={T.upsellScriptsSub} cta={T.upgradeCta} />
+        )}
 
         {confirmRestart && (
           <div className="panel rise-in flex flex-col gap-3 border-amber-500/30 p-5 sm:flex-row sm:items-center sm:justify-between">

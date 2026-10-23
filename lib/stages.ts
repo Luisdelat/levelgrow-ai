@@ -42,6 +42,8 @@ export interface StageText {
   title: string;
   goal: string;
   deliverables: [string, string, string];
+  /** What the Basic plan gets when it differs from the Full plan. */
+  basicDeliverables?: [string, string, string];
 }
 
 export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
@@ -65,6 +67,7 @@ export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
       title: 'Contenido que atrae',
       goal: 'Prepara tu perfil y tus primeros videos para atraer clientes.',
       deliverables: ['Perfil optimizado', '10 ideas de contenido', '10 guiones listos para grabar'],
+      basicDeliverables: ['Perfil optimizado', '10 ideas de contenido', '3 guiones listos para grabar'],
     },
     captacion: {
       title: 'Captación de clientes',
@@ -107,6 +110,7 @@ export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
       title: 'Content that attracts',
       goal: 'Get your profile and first videos ready to attract clients.',
       deliverables: ['Optimized profile', '10 content ideas', '10 ready-to-film scripts'],
+      basicDeliverables: ['Optimized profile', '10 content ideas', '3 ready-to-film scripts'],
     },
     captacion: {
       title: 'Client acquisition',
@@ -149,6 +153,7 @@ export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
       title: 'Привлекающий контент',
       goal: 'Подготовьте профиль и первые видео, чтобы привлекать клиентов.',
       deliverables: ['Оптимизированный профиль', '10 идей контента', '10 готовых сценариев'],
+      basicDeliverables: ['Оптимизированный профиль', '10 идей контента', '3 готовых сценария'],
     },
     captacion: {
       title: 'Привлечение клиентов',
@@ -191,6 +196,7 @@ export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
       title: 'Çeken içerik',
       goal: 'Profilinizi ve ilk videolarınızı müşteri çekecek şekilde hazırlayın.',
       deliverables: ['Optimize edilmiş profil', '10 içerik fikri', 'Çekime hazır 10 senaryo'],
+      basicDeliverables: ['Optimize edilmiş profil', '10 içerik fikri', 'Çekime hazır 3 senaryo'],
     },
     captacion: {
       title: 'Müşteri kazanımı',
@@ -233,6 +239,7 @@ export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
       title: 'Cəlb edən kontent',
       goal: 'Profilinizi və ilk videolarınızı müştəri cəlb etmək üçün hazırlayın.',
       deliverables: ['Optimallaşdırılmış profil', '10 kontent ideyası', 'Çəkilişə hazır 10 ssenari'],
+      basicDeliverables: ['Optimallaşdırılmış profil', '10 kontent ideyası', 'Çəkilişə hazır 3 ssenari'],
     },
     captacion: {
       title: 'Müştəri cəlbi',

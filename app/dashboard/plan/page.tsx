@@ -6,10 +6,11 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import AppShell from '@/components/AppShell';
 import DownloadPdfButton from '@/components/DownloadPdfButton';
+import UpgradeCard from '@/components/UpgradeCard';
 import { useLanguage } from '@/lib/useLanguage';
 import { APP_TEXT, fill, type AppText } from '@/lib/app-text';
 import { STAGE_IDS, STAGE_TEXT, stageHref, type StageId } from '@/lib/stages';
-import { fetchProgress, type ProgressResponse } from '@/lib/api-client';
+import { fetchProgress, fetchUsage, type ProgressResponse } from '@/lib/api-client';
 
 const GENOMA_FIELDS: { key: string; label: keyof AppText }[] = [
   { key: 'businessName', label: 'fBusinessName' },
@@ -45,11 +46,15 @@ function PlanContent() {
   const T = APP_TEXT[language];
   const S = STAGE_TEXT[language];
   const [progress, setProgress] = useState<ProgressResponse | null>(null);
+  const [plan, setPlan] = useState<'basic' | 'full' | null>(null);
 
   useEffect(() => {
     fetchProgress()
       .then(setProgress)
       .catch(() => setProgress({ completed: [], summaries: {}, genoma: null }));
+    fetchUsage()
+      .then((u) => setPlan(u.plan))
+      .catch(() => setPlan(null));
   }, []);
 
   if (!progress) {
@@ -93,6 +98,10 @@ function PlanContent() {
           />
         )}
       </header>
+
+      {plan === 'basic' && (
+        <UpgradeCard title={T.upsellPlanTitle} description={T.upsellPlanSub} cta={T.upgradeCta} />
+      )}
 
       {progress.genoma && (
         <section className="panel rise-in p-6">

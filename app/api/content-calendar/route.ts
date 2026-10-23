@@ -88,6 +88,8 @@ export async function POST(request: NextRequest) {
       summaries: progress.summaries,
       brief: CONTENT_CALENDAR_BRIEF,
       memory,
+      // Only Full plan users reach this tool.
+      plan: 'full',
     });
     sessionId =
       calendar.sessionId ??
