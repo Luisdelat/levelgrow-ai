@@ -10,7 +10,7 @@ import AdvisorChat from '@/components/AdvisorChat';
 import { useLanguage } from '@/lib/useLanguage';
 import { APP_TEXT, fill } from '@/lib/app-text';
 import { STAGE_IDS, STAGE_TEXT, isStageId, nextStage, stageHref, type StageId } from '@/lib/stages';
-import { completeStage, fetchProgress, type ProgressResponse } from '@/lib/api-client';
+import { completeStage, fetchProgress, restartStage, type ProgressResponse } from '@/lib/api-client';
 
 function StageContent({ stage }: { stage: StageId }) {
   const router = useRouter();
@@ -21,6 +21,11 @@ function StageContent({ stage }: { stage: StageId }) {
   const [userMessages, setUserMessages] = useState(0);
   const [completing, setCompleting] = useState(false);
   const [completeError, setCompleteError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [confirmRestart, setConfirmRestart] = useState(false);
+  const [restarting, setRestarting] = useState(false);
+  // Changing the key remounts the chat so a restarted stage opens fresh.
+  const [chatKey, setChatKey] = useState(0);
 
   useEffect(() => {
     fetchProgress()
@@ -41,17 +46,36 @@ function StageContent({ stage }: { stage: StageId }) {
       setCompleteError(T.completeNeedsChat);
       return;
     }
+    const wasDone = isDone;
     setCompleting(true);
     setCompleteError('');
+    setNotice('');
     try {
       const updated = await completeStage(stage, language);
       setProgress((prev) => ({ ...(prev ?? { genoma: null }), ...updated }));
+      if (wasDone) setNotice(T.updatedOk);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e) {
       const code = e instanceof Error ? e.message : '';
       setCompleteError(code === 'no_conversation' ? T.completeNeedsChat : T.completeError);
     } finally {
       setCompleting(false);
+    }
+  };
+
+  const onRestart = async () => {
+    setRestarting(true);
+    setCompleteError('');
+    setNotice('');
+    try {
+      await restartStage(stage);
+      setConfirmRestart(false);
+      setUserMessages(0);
+      setChatKey((k) => k + 1);
+    } catch {
+      setCompleteError(T.restartError);
+    } finally {
+      setRestarting(false);
     }
   };
 
@@ -157,21 +181,49 @@ function StageContent({ stage }: { stage: StageId }) {
           </div>
         )}
 
-        <AdvisorChat channel={stage} onUserMessageCount={onUserMessageCount} />
+        <AdvisorChat key={chatKey} channel={stage} onUserMessageCount={onUserMessageCount} />
 
-        {!isDone && (
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-slate-400">{completeError || T.completeHint}</p>
-            <button onClick={onComplete} disabled={completing} className="btn-accent">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className={`text-sm ${completeError ? 'text-amber-300' : notice ? 'text-emerald-400' : 'text-slate-400'}`}>
+            {completeError || notice || (isDone ? T.updateHint : T.completeHint)}
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            {!confirmRestart && (
+              <button
+                onClick={() => setConfirmRestart(true)}
+                disabled={completing || restarting}
+                className="btn-quiet"
+              >
+                ↺ {T.restartStage}
+              </button>
+            )}
+            <button onClick={onComplete} disabled={completing || restarting} className="btn-accent">
               {completing ? (
                 <>
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  {T.completing}
+                  {isDone ? T.updating : T.completing}
                 </>
               ) : (
-                <>✓ {T.completeStage}</>
+                <>✓ {isDone ? T.updateDeliverable : T.completeStage}</>
               )}
             </button>
+          </div>
+        </div>
+
+        {confirmRestart && (
+          <div className="panel rise-in flex flex-col gap-3 border-amber-500/30 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-slate-300">{T.restartConfirm}</p>
+            <div className="flex flex-shrink-0 gap-2">
+              <button onClick={() => setConfirmRestart(false)} disabled={restarting} className="btn-quiet">
+                {T.cancel}
+              </button>
+              <button onClick={onRestart} disabled={restarting} className="btn-accent">
+                {restarting && (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                )}
+                {T.restartYes}
+              </button>
+            </div>
           </div>
         )}
       </section>

@@ -37,6 +37,15 @@ export async function completeStage(stage: StageId, language: string): Promise<P
   return res.json();
 }
 
+export async function restartStage(stage: StageId): Promise<void> {
+  const res = await fetch('/api/progress/restart', {
+    method: 'POST',
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ stage }),
+  });
+  if (!res.ok) throw new Error(`restart ${res.status}`);
+}
+
 export interface UsageResponse {
   plan: 'basic' | 'full';
   used: number;
