@@ -102,7 +102,7 @@ function StageContent({ stage }: { stage: StageId }) {
       <div className="panel rise-in mx-auto max-w-xl p-8 text-center">
         <h1 className="text-xl font-semibold text-white">{T.needGenomaTitle}</h1>
         <p className="mt-2 text-slate-400">{T.needGenomaSub}</p>
-        <Link href="/dashboard/genoma" className="btn-accent mt-6">
+        <Link href="/dashboard/adn" className="btn-accent mt-6">
           {T.goGenoma} <span aria-hidden="true">→</span>
         </Link>
       </div>
@@ -260,7 +260,7 @@ function StageRouter() {
 
   useEffect(() => {
     if (!valid) router.replace('/dashboard/ruta');
-    else if (raw === 'genoma') router.replace('/dashboard/genoma');
+    else if (raw === 'genoma') router.replace('/dashboard/adn');
   }, [valid, raw, router]);
 
   if (!isStageId(raw) || raw === 'genoma') return null;

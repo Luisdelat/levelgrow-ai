@@ -56,7 +56,7 @@ export default function AppShell({
     {
       href: '/dashboard/ruta',
       label: T.navRoute,
-      match: (p: string) => p.startsWith('/dashboard/ruta') || p.startsWith('/dashboard/genoma'),
+      match: (p: string) => p.startsWith('/dashboard/ruta') || p.startsWith('/dashboard/adn'),
     },
     { href: '/dashboard/chat', label: T.navAdvisor, match: (p: string) => p.startsWith('/dashboard/chat') },
     { href: '/dashboard/plan', label: T.navPlan, match: (p: string) => p.startsWith('/dashboard/plan') },
@@ -137,7 +137,7 @@ export default function AppShell({
                       ))}
                     </div>
                     {[
-                      { href: '/dashboard/genoma', label: T.navGenoma },
+                      { href: '/dashboard/adn', label: T.navGenoma },
                       { href: '/dashboard/contenido', label: T.contentTitle },
                       { href: '/dashboard/revision', label: T.reviewTitle },
                       { href: '/checkout', label: T.navSubscription },

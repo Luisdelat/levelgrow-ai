@@ -107,7 +107,7 @@ function PlanContent() {
         <section className="panel rise-in p-6">
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="font-semibold text-white">{S.genoma.title}</h2>
-            <Link href="/dashboard/genoma" className="text-sm text-blue-400 hover:text-blue-300">
+            <Link href="/dashboard/adn" className="text-sm text-blue-400 hover:text-blue-300">
               {T.review}
             </Link>
           </div>

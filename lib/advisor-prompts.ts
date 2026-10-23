@@ -36,7 +36,7 @@ const BUSINESS_TYPES: Record<string, string> = {
 };
 
 export function formatGenoma(genoma: GenomaData | null): string {
-  if (!genoma) return '(El usuario todavía no ha llenado su GENOMA.)';
+  if (!genoma) return '(El usuario todavía no ha llenado su ADN.)';
   const lines: string[] = [];
   for (const [key, label] of Object.entries(GENOMA_LABELS)) {
     const raw = genoma[key];
@@ -44,7 +44,7 @@ export function formatGenoma(genoma: GenomaData | null): string {
     const value = key === 'businessType' ? BUSINESS_TYPES[raw] ?? raw : raw.trim();
     lines.push(`- ${label}: ${value}`);
   }
-  return lines.length ? lines.join('\n') : '(GENOMA vacío.)';
+  return lines.length ? lines.join('\n') : '(ADN vacío.)';
 }
 
 const METHOD = `
@@ -61,10 +61,10 @@ MÉTODO LEVELGROW (aplicado a un dueño de negocio):
 `;
 
 const STAGE_BRIEFS: Record<StageId, string> = {
-  genoma: `ETAPA: GENOMA. (Esta etapa se llena con un formulario; si el usuario llega aquí, ayúdale a mejorar sus respuestas.)`,
+  genoma: `ETAPA: ADN. (Esta etapa se llena con un formulario; si el usuario llega aquí, ayúdale a mejorar sus respuestas.)`,
   cliente: `ETAPA: CLIENTE IDEAL.
 Objetivo: una definición precisa de a quién le vende.
-Cómo guiar: parte de lo que puso en su GENOMA y propón un primer borrador. Afina con preguntas sobre: quién paga, qué edad/tipo de negocio, dónde está, qué problema urgente tiene, qué ha intentado, qué desea lograr, qué objeciones tiene, dónde pasa su tiempo (redes, lugares, grupos). Si su cliente es muy amplio, ayúdale a elegir el segmento más rentable para empezar.
+Cómo guiar: parte de lo que puso en su ADN y propón un primer borrador. Afina con preguntas sobre: quién paga, qué edad/tipo de negocio, dónde está, qué problema urgente tiene, qué ha intentado, qué desea lograr, qué objeciones tiene, dónde pasa su tiempo (redes, lugares, grupos). Si su cliente es muy amplio, ayúdale a elegir el segmento más rentable para empezar.
 Entregable: 1) frase "[cliente] en [ubicación] que [problema]"; 2) 5 dolores y 5 deseos en palabras del cliente; 3) objeciones típicas; 4) dónde encontrarlo.`,
   oferta: `ETAPA: PROMESA Y OFERTA.
 Objetivo: que su producto o servicio se entienda en segundos y dé ganas de comprar.
@@ -106,7 +106,7 @@ Entregable: calendario de 4 semanas, no negociables diarios y tablero de métric
 };
 
 const FREE_BRIEF = `MODO: CONSULTA LIBRE.
-El usuario te hace preguntas sueltas de marketing y ventas para su negocio. Responde de forma práctica y concreta aplicada a su GENOMA. Si la pregunta corresponde a una etapa de su ruta que aún no completó, respóndela y sugiérele trabajarla a fondo en esa etapa.`;
+El usuario te hace preguntas sueltas de marketing y ventas para su negocio. Responde de forma práctica y concreta aplicada a su ADN. Si la pregunta corresponde a una etapa de su ruta que aún no completó, respóndela y sugiérele trabajarla a fondo en esa etapa.`;
 
 /** How many full scripts the Contenido stage writes on each plan. */
 export const SCRIPTS_PER_PLAN: Record<PlanId, number> = { basic: 3, full: 10 };
@@ -179,7 +179,8 @@ IDIOMA: Responde SIEMPRE en ${langName}, aunque estas instrucciones estén en es
 
 CÓMO TRABAJAS:
 - Guías paso a paso, como un mentor 1 a 1. Un tema a la vez. Máximo 2 preguntas por mensaje.
-- MEMORIA: antes de preguntar cualquier cosa, revisa el GENOMA, la FICHA DEL NEGOCIO y lo construido en etapas anteriores. Si el dato ya está ahí, úsalo directamente (puedes decir "tomo lo que me dijiste: …"). Nunca vuelvas a pedir un dato que el usuario ya dio en esta u otra etapa; pregunta solo lo que de verdad falta.
+- NOMBRES: la primera etapa y el formulario base del negocio se llaman "ADN" (el ADN del negocio). Usa siempre "ADN"; nunca uses la palabra "genoma", aunque aparezca en mensajes antiguos.
+- MEMORIA: antes de preguntar cualquier cosa, revisa el ADN, la FICHA DEL NEGOCIO y lo construido en etapas anteriores. Si el dato ya está ahí, úsalo directamente (puedes decir "tomo lo que me dijiste: …"). Nunca vuelvas a pedir un dato que el usuario ya dio en esta u otra etapa; pregunta solo lo que de verdad falta.
 - Propón borradores concretos en vez de pedirle que escriba desde cero; luego ajústalos con sus respuestas.
 - Entregas cosas listas para usar (frases, mensajes, guiones, pasos), no teoría.
 - Lenguaje simple y cercano, sin jerga. Si usas un término técnico, explícalo en una línea.
@@ -193,7 +194,7 @@ CÓMO TRABAJAS:
 
 ${METHOD}
 
-GENOMA DEL USUARIO:
+ADN DEL USUARIO:
 ${formatGenoma(genoma)}
 
 ESTADO DE SU RUTA:
@@ -210,9 +211,9 @@ ${brief}`;
 /** Hidden first user turn that makes the advisor open a stage. */
 export function kickoffMessage(stage: StageId | typeof FREE_CHAT_ID): string {
   if (stage === FREE_CHAT_ID) {
-    return '(El usuario abrió la consulta libre. Salúdalo usando el nombre de su negocio, dile en 2 líneas en qué puedes ayudarle y sugiere 3 preguntas útiles que podría hacerte según su GENOMA. No uses el título "Entregable".)';
+    return '(El usuario abrió la consulta libre. Salúdalo usando el nombre de su negocio, dile en 2 líneas en qué puedes ayudarle y sugiere 3 preguntas útiles que podría hacerte según su ADN. No uses el título "Entregable".)';
   }
-  return '(El usuario acaba de abrir esta etapa. Salúdalo usando el nombre de su negocio, explica en 2–3 líneas qué lograremos en esta etapa y por qué le ayuda a conseguir clientes. Después da el primer paso: un primer borrador basado en su GENOMA, su FICHA DEL NEGOCIO y etapas anteriores, o la primera pregunta clave sobre algo que todavía no sepas. No uses todavía el título "Entregable".)';
+  return '(El usuario acaba de abrir esta etapa. Salúdalo usando el nombre de su negocio, explica en 2–3 líneas qué lograremos en esta etapa y por qué le ayuda a conseguir clientes. Después da el primer paso: un primer borrador basado en su ADN, su FICHA DEL NEGOCIO y etapas anteriores, o la primera pregunta clave sobre algo que todavía no sepas. No uses todavía el título "Entregable".)';
 }
 
 export function summaryInstruction(language: Language, stage?: StageId, plan: PlanId = 'basic'): string {
@@ -229,7 +230,7 @@ export const CONTENT_CALENDAR_BRIEF = `TAREA: CALENDARIO DE CONTENIDO DEL MES (P
 Crea 30 publicaciones para los próximos 30 días, pensadas para atraer a su cliente ideal y convertirlo en conversaciones y ventas.
 Esta tarea es la excepción al límite de longitud de mensajes. No menciones el botón «Completar etapa» ni termines con preguntas.
 Reglas:
-- Usa su GENOMA y lo que construyó en su ruta (cliente ideal, oferta, embudo). Si falta información, haz supuestos razonables y dilos al inicio en una línea.
+- Usa su ADN y lo que construyó en su ruta (cliente ideal, oferta, embudo). Si falta información, haz supuestos razonables y dilos al inicio en una línea.
 - Mezcla: 40% educativo (resolver dolores), 20% prueba social/antes y después, 20% detrás de cámara/historia del negocio, 20% venta directa con su oferta.
 - Formatos realistas para grabar con un celular: video corto (reel), carrusel, historia, foto con texto. Mayoría video corto.
 - Cada publicación termina con un CTA concreto (sígueme, comenta una palabra, escríbeme por WhatsApp, agenda).

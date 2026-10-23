@@ -2,7 +2,7 @@ import type { Language } from './translations';
 
 /**
  * The guided growth route of the LEVELGROW method:
- * GENOMA (ideal client -> promise -> offer -> sales script), then traffic
+ * ADN (ideal client -> promise -> offer -> sales script), then traffic
  * (organic + paid), a capture funnel, sales, and a 30-day execution plan.
  */
 export const STAGE_IDS = [
@@ -35,7 +35,7 @@ export function nextStage(id: StageId): StageId | null {
 }
 
 export function stageHref(id: StageId): string {
-  return id === 'genoma' ? '/dashboard/genoma' : `/dashboard/ruta/${id}`;
+  return id === 'genoma' ? '/dashboard/adn' : `/dashboard/ruta/${id}`;
 }
 
 export interface StageText {
@@ -49,7 +49,7 @@ export interface StageText {
 export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
   es: {
     genoma: {
-      title: 'Tu GENOMA',
+      title: 'Tu ADN',
       goal: 'Los datos base de tu negocio: qué vendes, a quién y qué quieres lograr.',
       deliverables: ['Perfil de tu negocio', 'Meta de 90 días', 'Punto de partida'],
     },
@@ -92,7 +92,7 @@ export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
   },
   en: {
     genoma: {
-      title: 'Your GENOME',
+      title: 'Your DNA',
       goal: 'The core facts of your business: what you sell, to whom, and what you want to achieve.',
       deliverables: ['Business profile', '90-day goal', 'Starting point'],
     },
@@ -135,7 +135,7 @@ export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
   },
   ru: {
     genoma: {
-      title: 'Ваш ГЕНОМ',
+      title: 'Ваша ДНК',
       goal: 'Основа вашего бизнеса: что вы продаёте, кому и чего хотите добиться.',
       deliverables: ['Профиль бизнеса', 'Цель на 90 дней', 'Точка старта'],
     },
@@ -178,7 +178,7 @@ export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
   },
   tr: {
     genoma: {
-      title: 'GENOM\'unuz',
+      title: 'DNA\'nız',
       goal: 'İşletmenizin temeli: ne sattığınız, kime sattığınız ve neyi başarmak istediğiniz.',
       deliverables: ['İşletme profili', '90 günlük hedef', 'Başlangıç noktası'],
     },
@@ -221,7 +221,7 @@ export const STAGE_TEXT: Record<Language, Record<StageId, StageText>> = {
   },
   az: {
     genoma: {
-      title: 'GENOM-unuz',
+      title: 'DNA-nız',
       goal: 'Biznesinizin əsası: nə satırsınız, kimə satırsınız və nəyə nail olmaq istəyirsiniz.',
       deliverables: ['Biznes profili', '90 günlük hədəf', 'Başlanğıc nöqtəsi'],
     },

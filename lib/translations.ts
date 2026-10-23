@@ -33,12 +33,12 @@ export const translations = {
     dashboard: 'Dashboard',
     welcome: 'Bienvenido',
     aiAssistant: 'Asistente IA',
-    genomaBuilder: 'GENOMA Builder',
+    genomaBuilder: 'Constructor de ADN',
     analytics: 'Analytics',
     backToDashboard: 'Volver al dashboard',
     
     // GENOMA
-    buildGenoma: 'Define tu GENOMA de Marketing',
+    buildGenoma: 'Define el ADN de Marketing de tu negocio',
     businessName: 'Nombre de tu Negocio',
     businessType: 'Tipo de Negocio',
     targetAudience: 'Audiencia Target',
@@ -47,7 +47,7 @@ export const translations = {
     services: 'Servicios/Productos Principales',
     differentiation: '¿Qué te Diferencia?',
     salesProcess: 'Tu Proceso de Ventas',
-    saveGenoma: 'Guardar GENOMA',
+    saveGenoma: 'Guardar ADN',
     cancel: 'Cancelar',
     
     // Chat
@@ -90,12 +90,12 @@ export const translations = {
     dashboard: 'Панель управления',
     welcome: 'Добро пожаловать',
     aiAssistant: 'ИИ Помощник',
-    genomaBuilder: 'GENOMA Конструктор',
+    genomaBuilder: 'Конструктор ДНК',
     analytics: 'Аналитика',
     backToDashboard: 'Вернуться на панель',
     
     // GENOMA
-    buildGenoma: 'Определите свой GENOMA Маркетинга',
+    buildGenoma: 'Определите маркетинговую ДНК',
     businessName: 'Название вашего бизнеса',
     businessType: 'Тип бизнеса',
     targetAudience: 'Целевая аудитория',
@@ -104,7 +104,7 @@ export const translations = {
     services: 'Основные услуги/продукты',
     differentiation: 'Что вас отличает?',
     salesProcess: 'Ваш процесс продаж',
-    saveGenoma: 'Сохранить GENOMA',
+    saveGenoma: 'Сохранить ДНК',
     cancel: 'Отменить',
     
     // Chat
@@ -147,12 +147,12 @@ export const translations = {
     dashboard: 'İdarəetmə Paneli',
     welcome: 'Xoş Gəlmisiniz',
     aiAssistant: 'AI Köməkçi',
-    genomaBuilder: 'GENOMA Qurucu',
+    genomaBuilder: 'DNA Qurucu',
     analytics: 'Analitika',
     backToDashboard: 'Panelə qayıt',
     
     // GENOMA
-    buildGenoma: 'Marketinq GENOMA-nı Müəyyən Et',
+    buildGenoma: 'Marketinq DNA-nı Müəyyən Et',
     businessName: 'Biznesin Adı',
     businessType: 'Biznes Tipi',
     targetAudience: 'Hədəf Auditoriya',
@@ -161,7 +161,7 @@ export const translations = {
     services: 'Əsas Xidmətlər/Məhsullar',
     differentiation: 'Sizi Fərqləndirən Nədir?',
     salesProcess: 'Satış Prosesiniz',
-    saveGenoma: 'GENOMA-nı Saxla',
+    saveGenoma: 'DNA-nı Saxla',
     cancel: 'İmtina Et',
     
     // Chat
@@ -204,12 +204,12 @@ export const translations = {
     dashboard: 'Dashboard',
     welcome: 'Welcome',
     aiAssistant: 'AI Assistant',
-    genomaBuilder: 'GENOMA Builder',
+    genomaBuilder: 'DNA Builder',
     analytics: 'Analytics',
     backToDashboard: 'Back to Dashboard',
 
     // GENOMA
-    buildGenoma: 'Define Your Marketing GENOMA',
+    buildGenoma: 'Define Your Marketing DNA',
     businessName: 'Business Name',
     businessType: 'Business Type',
     targetAudience: 'Target Audience',
@@ -218,7 +218,7 @@ export const translations = {
     services: 'Main Services/Products',
     differentiation: 'What Sets You Apart?',
     salesProcess: 'Your Sales Process',
-    saveGenoma: 'Save GENOMA',
+    saveGenoma: 'Save DNA',
     cancel: 'Cancel',
 
     // Chat
@@ -261,12 +261,12 @@ export const translations = {
     dashboard: 'Dashboard',
     welcome: 'Hoş Geldin',
     aiAssistant: 'AI Asistanı',
-    genomaBuilder: 'GENOMA Oluşturucu',
+    genomaBuilder: 'DNA Oluşturucu',
     analytics: 'Analitik',
     backToDashboard: 'Dashboard\'a Geri Dön',
 
     // GENOMA
-    buildGenoma: 'Pazarlama GENOMA\'nızı Tanımlayın',
+    buildGenoma: 'Pazarlama DNA\'nızı Tanımlayın',
     businessName: 'İşletme Adı',
     businessType: 'İşletme Türü',
     targetAudience: 'Hedef Kitle',
@@ -275,7 +275,7 @@ export const translations = {
     services: 'Ana Hizmetler/Ürünler',
     differentiation: 'Sizi Ayırt Eden Nedir?',
     salesProcess: 'Satış Süreciniz',
-    saveGenoma: 'GENOMA\'yı Kaydet',
+    saveGenoma: 'DNA\'yı Kaydet',
     cancel: 'İptal Et',
 
     // Chat

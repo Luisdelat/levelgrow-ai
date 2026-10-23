@@ -185,7 +185,7 @@ function DashboardContent() {
           {[
             { href: '/dashboard/chat', title: T.navAdvisor, text: T.toolAdvisor, icon: 'M4 5h16v10H8l-4 4V5Z', full: false },
             { href: '/dashboard/plan', title: T.navPlan, text: T.toolPlan, icon: 'M6 3h9l3 3v15H6V3Zm3 7h6m-6 4h6m-6 4h4', full: false },
-            { href: '/dashboard/genoma', title: T.navGenoma, text: T.toolGenoma, icon: 'M7 3c0 6 10 6 10 12s-10 6-10 6m10-18c0 6-10 6-10 12', full: false },
+            { href: '/dashboard/adn', title: T.navGenoma, text: T.toolGenoma, icon: 'M7 3c0 6 10 6 10 12s-10 6-10 6m10-18c0 6-10 6-10 12', full: false },
             { href: '/dashboard/contenido', title: T.contentTitle, text: T.toolContent, icon: 'M4 5h16v15H4V5Zm0 5h16M9 3v4m6-4v4', full: true },
             { href: '/dashboard/revision', title: T.reviewTitle, text: T.toolReview, icon: 'M4 19V9m6 10V5m6 14v-7m4 7H2', full: true },
           ].map((tool) => (
