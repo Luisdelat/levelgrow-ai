@@ -133,6 +133,9 @@ export default function AdvisorChat({ channel, onUserMessageCount, className = '
         );
         setMessages(history);
         setLoaded(true);
+        // The last message has no reply (for example the connection dropped):
+        // offer to retry instead of leaving the user waiting.
+        if (history[history.length - 1]?.role === 'user') setError(true);
         if (history.length === 0 && !kickedOff.current) {
           kickedOff.current = true;
           send(null);

@@ -83,7 +83,8 @@ export async function refreshMemory(userId: string, stageTitle: string, turns: T
     const client = new Anthropic();
     const response = await client.messages.create({
       model: ADVISOR_MODEL,
-      max_tokens: 1500,
+      // The model's own thinking counts toward max_tokens, so limits leave plenty of room.
+      max_tokens: 6000,
       system: MEMORY_SYSTEM,
       messages: [
         {

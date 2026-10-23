@@ -10,7 +10,7 @@ import { backfillMemory, loadMemory, refreshMemory } from '@/lib/business-memory
 
 export const runtime = 'nodejs';
 // Long replies (3 full scripts) plus the background fact-sheet update need more than 60 s.
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 const HISTORY_LIMIT = 40;
 const MAX_INPUT_CHARS = 4000;
@@ -184,7 +184,8 @@ export async function POST(request: NextRequest) {
   return streamClaude({
     system: systemPrompt,
     messages: turns,
-    maxTokens: 3000,
+    // The model's own thinking counts toward max_tokens, so limits leave plenty of room.
+    maxTokens: 12000,
     onComplete: async (full) => {
       // If the page was reloaded while the welcome was being written, a second
       // kickoff may run in parallel: keep only the first welcome.

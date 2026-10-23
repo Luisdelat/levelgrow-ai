@@ -9,7 +9,7 @@ import { LANGUAGES, type Language } from '@/lib/translations';
 import { loadMemory } from '@/lib/business-memory';
 
 export const runtime = 'nodejs';
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 const METRIC_KEYS = ['posts', 'conversations', 'appointments', 'sales', 'revenue', 'adSpend'] as const;
 type MetricKey = (typeof METRIC_KEYS)[number];
@@ -154,7 +154,8 @@ export async function POST(request: NextRequest) {
   return streamClaude({
     system,
     messages: [{ role: 'user', content: userContent }],
-    maxTokens: 1500,
+    // The model's own thinking counts toward max_tokens, so limits leave plenty of room.
+    maxTokens: 6000,
     onComplete: async (full) => {
       await db().chatMessage.create({ data: { sessionId, role: 'assistant', content: full } });
     },

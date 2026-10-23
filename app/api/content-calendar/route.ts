@@ -11,7 +11,7 @@ import { loadMemory } from '@/lib/business-memory';
 
 export const runtime = 'nodejs';
 // The 30-post calendar is a long reply.
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 const GENERATIONS_LIMIT = PLANS.full.calendarGenerations;
 
@@ -100,7 +100,8 @@ export async function POST(request: NextRequest) {
   return streamClaude({
     system,
     messages: [{ role: 'user', content: 'Crea mi calendario de contenido de este mes.' }],
-    maxTokens: 4500,
+    // The model's own thinking counts toward max_tokens, so limits leave plenty of room.
+    maxTokens: 16000,
     onComplete: async (full) => {
       await db().chatMessage.create({ data: { sessionId, role: 'assistant', content: full } });
     },

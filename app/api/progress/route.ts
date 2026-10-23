@@ -15,8 +15,8 @@ import { loadMemory, refreshMemory } from '@/lib/business-memory';
 import { LANGUAGES, type Language } from '@/lib/translations';
 
 export const runtime = 'nodejs';
-// Writing the Contenido deliverable (10 full scripts) can take close to a minute.
-export const maxDuration = 120;
+// Writing the Contenido deliverable (10 full scripts) takes about a minute or more.
+export const maxDuration = 300;
 
 
 /** GET /api/progress → route progress + latest GENOMA answers. */
@@ -92,7 +92,8 @@ export async function POST(request: NextRequest) {
       const [response] = await Promise.all([
         client.messages.create({
           model: ADVISOR_MODEL,
-          max_tokens: stage === 'contenido' ? 6000 : 1500,
+          // The model's own thinking counts toward max_tokens, so limits leave plenty of room.
+          max_tokens: stage === 'contenido' ? 20000 : 6000,
           system: buildSystemPrompt({
             stage,
             language,

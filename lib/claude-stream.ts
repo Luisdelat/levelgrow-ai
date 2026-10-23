@@ -30,6 +30,11 @@ export function streamClaude(opts: {
             controller.enqueue(encoder.encode(event.delta.text));
           }
         }
+        const final = await response.finalMessage();
+        if (final.stop_reason !== 'end_turn') {
+          // A cut-off reply must be visible in the logs.
+          console.error(`Advisor reply stopped early: ${final.stop_reason}`);
+        }
         if (full.trim()) await opts.onComplete(full);
       } catch (error) {
         console.error('Claude stream error:', error);
