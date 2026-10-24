@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { LEGAL_UI } from '@/lib/legal';
 import { useLanguage } from '@/lib/useLanguage';
 import { APP_TEXT } from '@/lib/app-text';
 import type { PdfSection } from '@/lib/pdf/deliverable-pdf';
@@ -41,6 +42,7 @@ export default function DownloadPdfButton({
         sections,
         fileName: pdfFileName('levelgrow', title, businessName),
         pageLabel: T.pdfPage,
+        aiNotice: LEGAL_UI[language].aiShort,
         dateLabel: new Date().toLocaleDateString(LOCALES[language], { year: 'numeric', month: 'long', day: 'numeric' }),
       });
     } catch (error) {

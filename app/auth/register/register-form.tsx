@@ -23,6 +23,15 @@ export default function RegisterForm() {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+
+  const ERRORS: Record<string, string> = {
+    invalid_email: t('invalidEmail'),
+    weak_password: t('weakPassword'),
+    terms_required: t('mustAcceptTerms'),
+    email_taken: t('emailAlreadyRegistered'),
+    too_many_attempts: t('tooManyAttempts'),
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -42,6 +51,16 @@ export default function RegisterForm() {
       setLoading(false);
       return;
     }
+    if (formData.password.length < 8) {
+      setError(t('weakPassword'));
+      setLoading(false);
+      return;
+    }
+    if (!acceptTerms) {
+      setError(t('mustAcceptTerms'));
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch('/api/auth/register', {
@@ -51,13 +70,14 @@ export default function RegisterForm() {
           email: formData.email,
           password: formData.password,
           plan: formData.plan,
+          acceptTerms,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || t('connectionError'));
+        setError(ERRORS[data.error] || t('connectionError'));
         return;
       }
 
@@ -112,6 +132,7 @@ export default function RegisterForm() {
                   onChange={handleChange}
                   className="input w-full pr-10"
                   placeholder="••••••••"
+                  minLength={8}
                   required
                 />
                 <button
@@ -158,6 +179,27 @@ export default function RegisterForm() {
                 <option value="full">{t('fullPlan')} - $99{t('perMonth')}</option>
               </select>
             </div>
+
+            <label className="flex items-start gap-3 text-sm text-gray-300 leading-relaxed cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                className="mt-1 h-4 w-4 shrink-0 accent-blue-500"
+                required
+              />
+              <span>
+                {t('acceptTermsPre')}{' '}
+                <Link href="/legal/terminos" target="_blank" className="text-blue-400 underline hover:text-blue-300">
+                  {t('termsLink')}
+                </Link>{' '}
+                {t('andWord')}{' '}
+                <Link href="/legal/privacidad" target="_blank" className="text-blue-400 underline hover:text-blue-300">
+                  {t('privacyLink')}
+                </Link>
+                {t('acceptTermsPost')}
+              </span>
+            </label>
 
             <button
               type="submit"

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
 import LogoMark from './LogoMark';
+import LegalLinks from './LegalLinks';
 import { useAuth } from '@/lib/useAuth';
 import { useLanguage } from '@/lib/useLanguage';
 import { APP_TEXT } from '@/lib/app-text';
@@ -174,6 +175,12 @@ export default function AppShell({
           children
         )}
       </main>
+      <footer className="border-t border-slate-800/80">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-5 sm:px-6">
+          <span className="text-xs text-slate-600">© {new Date().getFullYear()} LEVELGROW AI</span>
+          <LegalLinks />
+        </div>
+      </footer>
     </div>
   );
 }

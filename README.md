@@ -33,8 +33,8 @@ Crear archivo `.env.local`:
 
 ```env
 # PayPal Configuration
-NEXT_PUBLIC_PAYPAL_CLIENT_ID=BAARP-LsUUZTVhF2y-pr
-PAYPAL_SECRET=EMa5olriIfeQ0dVlEPlAjW4hyMAKeUCr2uO45Lw4gGowXw1XP4zySkS8sNNZ-QpkB1JwWlY6yHH2gpL5
+NEXT_PUBLIC_PAYPAL_CLIENT_ID=<tu-client-id>
+PAYPAL_SECRET=<tu-secret>
 
 # Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
@@ -42,7 +42,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_KEY=your-service-role-key
 
 # Claude API
-NEXT_PUBLIC_CLAUDE_API_KEY=sk-ant-your-key-here
+NEXT_PUBLIC_CLAUDE_API_KEY=<tu-api-key>
 
 # Database
 DATABASE_URL=postgresql://user:password@localhost:5432/levelgrow
@@ -95,7 +95,7 @@ npx prisma studio
 
 Las credenciales PayPal ya están en `.env.local`. Solo verificar que sean correctas:
 
-- **Client ID**: `BAARP-LsUUZTVhF2y-pr`
+- **Client ID**: `<tu-client-id>`
 - **Secret**: Configurada
 
 ## Desarrollo

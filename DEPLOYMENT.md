@@ -30,8 +30,8 @@ Tu aplicación está lista para deployar en Vercel. Solo necesitas completar 3 p
 
 ```
 DATABASE_URL = [La cadena de Supabase del PASO 1]
-NEXT_PUBLIC_PAYPAL_CLIENT_ID = BAARP-LsUUZTVhF2y-pr
-PAYPAL_SECRET = EMa5olriIfeQ0dVlEPlAjW4hyMAKeUCr2uO45Lw4gGowXw1XP4zySkS8sNNZ-QpkB1JwWlY6yHH2gpL5
+NEXT_PUBLIC_PAYPAL_CLIENT_ID = <tu-client-id>
+PAYPAL_SECRET = <tu-secret>
 NEXT_PUBLIC_CLAUDE_API_KEY = [Tu Claude API Key]
 ```
 
@@ -75,8 +75,8 @@ NEXT_PUBLIC_CLAUDE_API_KEY = [Tu Claude API Key]
 | Variable | Valor | Dónde obtener |
 |----------|-------|---------------|
 | `DATABASE_URL` | PostgreSQL connection string | Supabase Settings → Database |
-| `NEXT_PUBLIC_PAYPAL_CLIENT_ID` | BAARP-LsUUZTVhF2y-pr | ✅ Ya incluido |
-| `PAYPAL_SECRET` | EMa5olriIfe... | ✅ Ya incluido |
+| `NEXT_PUBLIC_PAYPAL_CLIENT_ID` | <tu-client-id> | ✅ Ya incluido |
+| `PAYPAL_SECRET` | <tu-secret> | ✅ Ya incluido |
 | `NEXT_PUBLIC_CLAUDE_API_KEY` | sk-ant-... | https://console.anthropic.com |
 
 ---

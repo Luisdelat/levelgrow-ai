@@ -28,8 +28,13 @@ export default function LoginPage() {
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || t('connectionError'));
+        throw new Error(
+          response.status === 429
+            ? t('tooManyAttempts')
+            : response.status === 401
+              ? t('emailOrPasswordIncorrect')
+              : t('connectionError'),
+        );
       }
 
       const { token } = await response.json();

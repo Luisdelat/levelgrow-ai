@@ -1,42 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
+import { db } from '@/lib/prisma';
 
 export const runtime = 'nodejs';
 
-export async function GET(request: NextRequest) {
-  console.log('Health check - checking database connection...');
-  console.log('DATABASE_URL set:', !!process.env.DATABASE_URL);
-
-  const prisma = new PrismaClient({
-    log: ['query', 'error', 'warn'],
-  });
-
+/** Public health check: says only whether the database answers, never why not. */
+export async function GET() {
   try {
-    // Simple connection test
-    const result = await prisma.$queryRaw`SELECT NOW() as timestamp`;
-    console.log('✓ Database connection successful');
-
-    return NextResponse.json({
-      status: 'ok',
-      database: 'connected',
-      timestamp: new Date().toISOString(),
-      result
-    });
+    await db().$queryRaw`SELECT 1`;
+    return NextResponse.json({ status: 'ok' });
   } catch (error) {
-    console.error('✗ Database connection failed:', error);
-    return NextResponse.json(
-      {
-        status: 'error',
-        database: 'disconnected',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        details: {
-          name: error instanceof Error ? error.name : 'Unknown',
-          message: error instanceof Error ? error.message : 'Unknown'
-        }
-      },
-      { status: 503 }
-    );
-  } finally {
-    await prisma.$disconnect();
+    console.error('Health check: database unavailable', error);
+    return NextResponse.json({ status: 'error' }, { status: 503 });
   }
 }

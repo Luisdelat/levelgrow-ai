@@ -7,6 +7,7 @@ import LogoMark from './LogoMark';
 import { authHeaders } from '@/lib/api-client';
 import { useLanguage } from '@/lib/useLanguage';
 import { APP_TEXT, fill } from '@/lib/app-text';
+import { LEGAL_UI } from '@/lib/legal';
 
 interface ChatMessage {
   id: string;
@@ -271,6 +272,12 @@ export default function AdvisorChat({ channel, onUserMessageCount, className = '
             </svg>
           </button>
         </div>
+        <p className="mt-2 text-center text-[11px] leading-snug text-slate-500">
+          {LEGAL_UI[language].aiShort}{' '}
+          <a href="/legal/ia" target="_blank" className="underline hover:text-slate-300">
+            {LEGAL_UI[language].ai}
+          </a>
+        </p>
       </form>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import LogoMark from '@/components/LogoMark';
+import LegalLinks from '@/components/LegalLinks';
 import { useLanguage } from '@/lib/useLanguage';
 import { LANDING_TEXT } from '@/lib/landing-text';
 import { STAGE_IDS, STAGE_TEXT } from '@/lib/stages';
@@ -270,6 +271,7 @@ export default function Home() {
           <span>
             © {new Date().getFullYear()} LEVELGROW AI. {L.footer}
           </span>
+          <LegalLinks className="w-full sm:w-auto" />
         </div>
       </footer>
     </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/prisma';
 import { getUserId } from '@/lib/route-progress';
+import { LEGAL_VERSION } from '@/lib/legal';
 import { cancelSubscription, getSubscription, paypalConfig, planForPayPalPlanId } from '@/lib/paypal';
 
 export const runtime = 'nodejs';
@@ -42,6 +43,8 @@ export async function POST(request: NextRequest) {
       currentPeriodStart: remote.start_time ? new Date(remote.start_time) : new Date(),
       currentPeriodEnd: next ? new Date(next) : null,
       cancelledAt: null,
+      // Consent from the checkout box. Never blocks activation: the buyer has already paid.
+      ...(body.acceptedTerms === true ? { termsAcceptedAt: new Date(), termsVersion: LEGAL_VERSION } : {}),
     };
     await db().subscription.upsert({
       where: { userId },

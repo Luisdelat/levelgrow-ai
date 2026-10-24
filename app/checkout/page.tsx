@@ -10,6 +10,7 @@ import { APP_TEXT, fill } from '@/lib/app-text';
 import { LANDING_TEXT } from '@/lib/landing-text';
 import { PLANS, type PlanId } from '@/lib/plans';
 import { authHeaders } from '@/lib/api-client';
+import { LEGAL_UI } from '@/lib/legal';
 
 interface PayPalConfig {
   configured: boolean;
@@ -66,6 +67,8 @@ function Checkout() {
   const [status, setStatus] = useState<'idle' | 'processing' | 'done'>('idle');
   const [error, setError] = useState('');
   const buttonsRef = useRef<HTMLDivElement>(null);
+  // Express consent (immediate access, no refunds, waiver of withdrawal) before paying.
+  const [consent, setConsent] = useState(false);
 
   useEffect(() => {
     fetch('/api/paypal/config', { cache: 'no-store' })
@@ -77,7 +80,9 @@ function Checkout() {
   const complimentary = subscription?.status === 'complimentary';
   const currentPlan: PlanId | null = access && user ? (user.plan === 'full' ? 'full' : 'basic') : null;
   const alreadyOnSelected = currentPlan === plan && subscription?.status === 'active';
-  const showButtons = Boolean(config?.configured && config.clientId && user && !complimentary && !alreadyOnSelected);
+  const showButtons = Boolean(
+    consent && config?.configured && config.clientId && user && !complimentary && !alreadyOnSelected,
+  );
 
   // Render PayPal buttons for the selected plan.
   useEffect(() => {
@@ -104,7 +109,7 @@ function Checkout() {
             const res = await fetch('/api/paypal/activate', {
               method: 'POST',
               headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-              body: JSON.stringify({ subscriptionId: data.subscriptionID }),
+              body: JSON.stringify({ subscriptionId: data.subscriptionID, acceptedTerms: true }),
             });
             if (!res.ok) {
               setStatus('idle');
@@ -254,6 +259,27 @@ function Checkout() {
                   <p className="text-center text-sm text-slate-300">{T.processing}</p>
                 )}
                 {status === 'done' && <p className="text-center text-sm text-emerald-400">{T.activated}</p>}
+                <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-700 bg-slate-900/60 p-3 text-xs leading-relaxed text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={consent}
+                    onChange={(e) => setConsent(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-blue-500"
+                  />
+                  <span>
+                    {LEGAL_UI[language].checkoutConsent}{' '}
+                    <Link href="/legal/terminos" target="_blank" className="text-blue-400 underline">
+                      {LEGAL_UI[language].terms}
+                    </Link>
+                    {' · '}
+                    <Link href="/legal/reembolsos" target="_blank" className="text-blue-400 underline">
+                      {LEGAL_UI[language].refunds}
+                    </Link>
+                  </span>
+                </label>
+                {!consent && (
+                  <p className="text-center text-xs text-slate-500">{LEGAL_UI[language].checkoutConsentRequired}</p>
+                )}
                 <div ref={buttonsRef} className={status === 'idle' ? '' : 'pointer-events-none opacity-50'} />
                 {!config.live && <p className="text-center text-xs text-amber-300">{T.sandboxNote}</p>}
               </>

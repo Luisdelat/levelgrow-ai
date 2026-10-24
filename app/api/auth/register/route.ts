@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { hashPassword, generateToken } from '@/lib/auth';
+import { hashPassword, generateToken, normalizeEmail, EMAIL_RE } from '@/lib/auth';
+import { clientIp, hit } from '@/lib/rate-limit';
+import { LEGAL_VERSION } from '@/lib/legal';
 import { PrismaClient } from '@prisma/client';
 
 export const runtime = 'nodejs';
@@ -58,45 +60,48 @@ async function ensureDatabaseTables(prisma: PrismaClient) {
 }
 
 export async function POST(request: NextRequest) {
+  const ip = clientIp(request);
+  const wait = hit(`register:${ip}`, 8, 60 * 60 * 1000);
+  if (wait) {
+    return NextResponse.json({ error: 'too_many_attempts' }, { status: 429, headers: { 'Retry-After': String(wait) } });
+  }
+
   const prisma = new PrismaClient();
   try {
     // Ensure database tables exist
     await ensureDatabaseTables(prisma);
 
-    const { email, password, plan } = await request.json();
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+    const email = normalizeEmail(body.email);
+    const password = typeof body.password === 'string' ? body.password : '';
+    // The real plan is decided by the PayPal subscription; this is only a preference.
+    const plan = body.plan === 'full' ? 'full' : 'basic';
 
-    // Validate input
-    if (!email || !password || !plan) {
-      return NextResponse.json(
-        { error: 'Email, password, and plan are required' },
-        { status: 400 }
-      );
+    if (!EMAIL_RE.test(email) || email.length > 254) {
+      return NextResponse.json({ error: 'invalid_email' }, { status: 400 });
+    }
+    if (password.length < 8 || password.length > 128) {
+      return NextResponse.json({ error: 'weak_password' }, { status: 400 });
+    }
+    if (body.acceptTerms !== true) {
+      return NextResponse.json({ error: 'terms_required' }, { status: 400 });
     }
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'Email already registered' },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'email_taken' }, { status: 409 });
     }
 
-    // Hash password
     const passwordHash = await hashPassword(password);
 
-    // Create user
     const user = await prisma.user.create({
       data: {
         email,
         passwordHash,
         plan,
-        profile: {
-          create: {},
-        },
+        termsAcceptedAt: new Date(),
+        termsVersion: LEGAL_VERSION,
+        profile: { create: {} },
         subscription: {
           create: {
             plan,
@@ -106,26 +111,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Generate token
     const token = generateToken(user.id, user.email);
 
     return NextResponse.json(
-      {
-        token,
-        user: {
-          id: user.id,
-          email: user.email,
-          plan: user.plan,
-        },
-      },
-      { status: 201 }
+      { token, user: { id: user.id, email: user.email, plan: user.plan } },
+      { status: 201 },
     );
   } catch (error) {
     console.error('Registration error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'server_error' }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }

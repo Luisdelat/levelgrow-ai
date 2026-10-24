@@ -15,6 +15,8 @@ model User {
   email               String     @unique
   passwordHash        String
   plan                String     @default("basic") // "basic" or "full"
+  termsAcceptedAt     DateTime?  // when the user accepted the Terms and Privacy Policy
+  termsVersion        String?    // which version (LEGAL_VERSION) they accepted
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
 
@@ -58,6 +60,10 @@ model Subscription {
   currentPeriodStart  DateTime?
   currentPeriodEnd    DateTime?
   cancelledAt         DateTime?
+
+  // Checkout consent: immediate access, no refunds, waiver of withdrawal period.
+  termsAcceptedAt     DateTime?
+  termsVersion        String?
 
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
