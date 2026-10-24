@@ -6,7 +6,7 @@ import type { Language } from './translations';
 
 export const LEGAL_VERSION = '2026-10-24';
 export const LEGAL_UPDATED = { es: '24 de octubre de 2026', en: 'October 24, 2026' };
-export const LEGAL_OPERATOR = 'LevelGrow Marketing Digital';
+export const LEGAL_OPERATOR = 'LEVELGROW LLC';
 export const LEGAL_LOCATION = 'Miami, Florida, USA';
 export const LEGAL_EMAIL = 'luisarturosmart@gmail.com';
 
