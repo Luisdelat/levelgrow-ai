@@ -15,7 +15,7 @@ import { PROMO_TEXT, promoFill } from '@/lib/promo-text';
 export default function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const planParam = searchParams.get('plan') || 'basic';
+  const planParam = searchParams.get('plan') === 'full' ? 'full' : 'basic';
   const { t, language } = useLanguage();
   const [promo, setPromo] = useState(true);
   useEffect(() => setPromo(launchPromoActive()), []);
@@ -193,21 +193,55 @@ export default function RegisterForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">{t('choosePlan')}</label>
-              <select
-                name="plan"
-                value={formData.plan}
-                onChange={handleChange}
-                className="input"
-              >
-                <option value="basic">
-                  {t('basicPlan')} -{' '}
-                  {promo
-                    ? promoFill(PROMO_TEXT[language].registerOption, { price: PLANS.basic.price })
-                    : `$${PLANS.basic.price}${t('perMonth')}`}
-                </option>
-                <option value="full">{t('fullPlan')} - ${PLANS.full.price}{t('perMonth')}</option>
-              </select>
+              <p className="block text-sm font-medium mb-3">{t('choosePlan')}</p>
+              <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label={t('choosePlan')}>
+                {(['basic', 'full'] as const).map((id) => {
+                  const selected = formData.plan === id;
+                  const showPromo = promo && id === 'basic';
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      onClick={() => setFormData((prev) => ({ ...prev, plan: id }))}
+                      className={`relative flex flex-col items-start rounded-xl border p-3.5 pt-4 text-left transition-all duration-200 ${
+                        selected
+                          ? 'border-blue-500 bg-blue-500/10 shadow-[0_0_24px_rgba(59,130,246,0.25)]'
+                          : 'border-slate-700 bg-slate-900/60 hover:border-slate-500'
+                      }`}
+                    >
+                      {showPromo && (
+                        <span className="absolute -top-2.5 left-3 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                          {PROMO_TEXT[language].badge}
+                        </span>
+                      )}
+                      {id === 'full' && (
+                        <span className="absolute -top-2.5 left-3 rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                          {LANDING_TEXT[language].recommended}
+                        </span>
+                      )}
+                      <span
+                        className={`absolute right-3 top-3.5 flex h-4 w-4 items-center justify-center rounded-full border ${
+                          selected ? 'border-blue-500 bg-blue-500' : 'border-slate-600'
+                        }`}
+                      >
+                        {selected && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                      </span>
+                      <span className="text-sm font-semibold text-white">{id === 'full' ? t('fullPlan') : t('basicPlan')}</span>
+                      <span className="mt-1.5 flex items-baseline gap-0.5">
+                        <span className="text-2xl font-bold text-white">${PLANS[id].price}</span>
+                        <span className="text-xs text-slate-400">{t('perMonth')}</span>
+                      </span>
+                      <span className={`mt-1 text-[11px] leading-snug ${showPromo ? 'text-emerald-300' : 'text-slate-400'}`}>
+                        {showPromo
+                          ? promoFill(PROMO_TEXT[language].registerOption, { price: PLANS.basic.price })
+                          : LANDING_TEXT[language][id === 'full' ? 'fullFor' : 'basicFor']}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <label className="flex items-start gap-3 text-sm text-gray-300 leading-relaxed cursor-pointer">
