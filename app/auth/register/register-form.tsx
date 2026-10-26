@@ -5,6 +5,10 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLanguage } from '@/lib/useLanguage';
 import { LanguageSelector } from '@/components/LanguageSelector';
+import LogoMark from '@/components/LogoMark';
+import AuthBackdrop from '@/components/AuthBackdrop';
+import AIThinking from '@/components/AIThinking';
+import { LANDING_TEXT } from '@/lib/landing-text';
 import { PLANS, launchPromoActive } from '@/lib/plans';
 import { PROMO_TEXT, promoFill } from '@/lib/promo-text';
 
@@ -95,15 +99,32 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 flex flex-col items-center justify-center p-4">
+    <div className="app-bg relative isolate flex min-h-screen flex-col items-center justify-center overflow-x-hidden p-4 py-16">
+      <AuthBackdrop />
       {/* Language Selector */}
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 z-10">
         <LanguageSelector />
       </div>
 
-      <div className="w-full max-w-md">
-        <div className="card">
-          <h1 className="text-3xl font-bold mb-2 text-center">LEVELGROW AI</h1>
+      <div className="grid w-full max-w-md items-center gap-10 lg:max-w-5xl lg:grid-cols-[1fr_28rem]">
+        {/* While they sign up, the AI is already working (desktop) */}
+        <div className="rise-in hidden lg:block">
+          <LogoMark size={72} animated />
+          <h2 className="mt-6 text-balance text-4xl font-semibold leading-tight tracking-tight text-white">
+            LEVELGROW <span className="ai-text">AI</span>
+          </h2>
+          <p className="mt-3 max-w-md text-lg leading-relaxed text-slate-400">{LANDING_TEXT[language].heroTitle}</p>
+          <AIThinking language={language} className="mt-8 max-w-md" />
+        </div>
+
+        <div className="ai-ring rise-in rounded-2xl" style={{ animationDelay: '100ms' }}>
+        <div className="card bg-slate-900/70 backdrop-blur-xl">
+          <div className="mb-2 flex justify-center lg:hidden">
+            <LogoMark size={56} animated />
+          </div>
+          <h1 className="text-3xl font-bold mb-2 text-center">
+            LEVELGROW <span className="ai-text">AI</span>
+          </h1>
           <p className="text-gray-400 text-center mb-8">{t('createAccount')}</p>
 
           {error && (
@@ -225,6 +246,7 @@ export default function RegisterForm() {
               {t('signInHere')}
             </Link>
           </p>
+        </div>
         </div>
       </div>
     </div>

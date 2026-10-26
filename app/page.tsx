@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import LogoMark from '@/components/LogoMark';
 import LegalLinks from '@/components/LegalLinks';
+import NeuralField from '@/components/NeuralField';
+import FloatingLogos from '@/components/FloatingLogos';
+import AIThinking from '@/components/AIThinking';
 import { useLanguage } from '@/lib/useLanguage';
 import { LANDING_TEXT } from '@/lib/landing-text';
 import { STAGE_IDS, STAGE_TEXT } from '@/lib/stages';
@@ -36,21 +39,44 @@ export default function Home() {
   const [promo, setPromo] = useState(true);
   useEffect(() => setPromo(launchPromoActive()), []);
 
+  // Sections fade in as they scroll into view.
+  useEffect(() => {
+    const items = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
+    if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      items.forEach((el) => el.classList.add('is-in'));
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target as HTMLElement;
+          const siblings = Array.from(el.parentElement?.children ?? []);
+          el.style.transitionDelay = `${Math.min(siblings.indexOf(el), 6) * 80}ms`;
+          el.classList.add('is-in');
+          io.unobserve(el);
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' },
+    );
+    items.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
   return (
     <div className="app-bg relative isolate min-h-screen overflow-x-hidden text-slate-100">
-      {/* Living logo watermark */}
+      {/* Living AI background: neural network + floating logos at different depths */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
         <div className="app-grid absolute inset-0" />
-        <div className="lg-watermark absolute -right-40 top-16 opacity-[0.10] sm:-right-16 lg:right-[2%]">
-          <LogoMark size={680} animated />
-        </div>
+        <NeuralField />
+        <FloatingLogos />
       </div>
 
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-[#0a0e16]/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
           <Link href="/" className="flex flex-shrink-0 items-center gap-2.5">
-            <LogoMark size={34} compact />
+            <LogoMark size={34} compact animated />
             <span className="whitespace-nowrap text-[15px] font-semibold tracking-wide text-white">
               LEVELGROW <span className="text-blue-400">AI</span>
             </span>
@@ -91,7 +117,15 @@ export default function Home() {
         {/* Hero */}
         <section className="mx-auto grid max-w-6xl items-center gap-12 px-4 pb-20 pt-16 sm:px-6 lg:grid-cols-[1.15fr_1fr] lg:pt-24">
           <div className="rise-in">
-            <p className="text-sm font-medium text-blue-400">{L.eyebrow}</p>
+            <p className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-sm font-medium text-blue-300 backdrop-blur-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-400" />
+              </span>
+              <span className="ai-text font-semibold">AI</span>
+              <span className="text-slate-500">·</span>
+              {L.eyebrow}
+            </p>
             <h1 className="mt-4 text-balance text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
               {L.heroTitle}
             </h1>
@@ -106,8 +140,9 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Product preview: the real route */}
-          <div className="panel rise-in p-5 sm:p-6" style={{ animationDelay: '120ms' }} aria-hidden="true">
+          {/* Product preview: the real route, and the AI writing live */}
+          <div className="rise-in space-y-4" style={{ animationDelay: '120ms' }}>
+          <div className="panel ai-ring p-5 backdrop-blur-md sm:p-6" aria-hidden="true">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-white">{L.previewLabel}</p>
               <span className="text-xs tabular-nums text-slate-400">2 / {STAGE_IDS.length}</span>
@@ -144,6 +179,8 @@ export default function Home() {
               })}
             </ol>
           </div>
+          <AIThinking language={language} />
+          </div>
         </section>
 
         {/* How it works */}
@@ -153,7 +190,7 @@ export default function Home() {
             <p className="mt-2 max-w-2xl text-slate-400">{L.howSub}</p>
             <ol className="mt-10 grid gap-4 md:grid-cols-3">
               {L.steps.map((step, i) => (
-                <li key={step.title} className="panel p-6">
+                <li key={step.title} className="panel panel-hover reveal p-6">
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600/15 text-sm font-semibold text-blue-400 ring-1 ring-blue-500/30">
                     {i + 1}
                   </span>
@@ -172,7 +209,7 @@ export default function Home() {
             <p className="mt-2 max-w-2xl text-slate-400">{L.routeSub}</p>
             <ol className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {STAGE_IDS.map((id, i) => (
-                <li key={id} className="panel p-5">
+                <li key={id} className="panel panel-hover reveal p-5">
                   <p className="text-xs font-semibold tabular-nums text-blue-400">{String(i + 1).padStart(2, '0')}</p>
                   <h3 className="mt-2 font-medium text-white">{S[id].title}</h3>
                   <p className="mt-1.5 text-sm leading-snug text-slate-400">{S[id].goal}</p>
@@ -188,7 +225,7 @@ export default function Home() {
             <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">{L.benefitsTitle}</h2>
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               {L.benefits.map((b) => (
-                <div key={b.title} className="panel flex gap-4 p-6">
+                <div key={b.title} className="panel panel-hover reveal flex gap-4 p-6">
                   <Check />
                   <div>
                     <h3 className="font-semibold text-white">{b.title}</h3>
@@ -212,7 +249,7 @@ export default function Home() {
               ].map((plan) => (
                 <div
                   key={plan.id}
-                  className={`panel relative flex flex-col p-7 sm:p-8 ${plan.featured ? 'border-blue-500/50 bg-blue-500/[0.05]' : ''}`}
+                  className={`panel reveal relative flex flex-col p-7 sm:p-8 ${plan.featured ? 'ai-ring border-blue-500/50 bg-blue-500/[0.05]' : ''}`}
                 >
                   {plan.featured && (
                     <span className="absolute -top-3 right-6 rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white">

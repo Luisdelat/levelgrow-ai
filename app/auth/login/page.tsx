@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from '@/lib/useLanguage';
 import { LanguageSelector } from '@/components/LanguageSelector';
+import LogoMark from '@/components/LogoMark';
+import AuthBackdrop from '@/components/AuthBackdrop';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -48,16 +50,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950 to-gray-950 flex flex-col items-center justify-center p-4">
+    <div className="app-bg relative isolate flex min-h-screen flex-col items-center justify-center overflow-x-hidden p-4">
+      <AuthBackdrop />
       {/* Language Selector */}
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 z-10">
         <LanguageSelector />
       </div>
 
-      <div className="w-full max-w-md">
-        <div className="bg-gray-900/60 backdrop-blur-xl rounded-2xl border border-blue-500/20 p-8 shadow-2xl">
+      <div className="ai-ring rise-in w-full max-w-md rounded-2xl">
+        <div className="bg-gray-900/70 backdrop-blur-xl rounded-2xl border border-blue-500/20 p-8 shadow-2xl">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">LEVELGROW</h1>
+            <div className="mb-3 flex justify-center">
+              <LogoMark size={64} animated />
+            </div>
+            <h1 className="text-4xl font-bold text-white mb-2">
+              LEVELGROW <span className="ai-text">AI</span>
+            </h1>
             <p className="text-blue-400 text-sm">Asistente de Marketing Inteligente</p>
           </div>
 
