@@ -1,16 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLanguage } from '@/lib/useLanguage';
 import { LanguageSelector } from '@/components/LanguageSelector';
+import { PLANS, launchPromoActive } from '@/lib/plans';
+import { PROMO_TEXT, promoFill } from '@/lib/promo-text';
 
 export default function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const planParam = searchParams.get('plan') || 'basic';
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [promo, setPromo] = useState(true);
+  useEffect(() => setPromo(launchPromoActive()), []);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -175,8 +179,13 @@ export default function RegisterForm() {
                 onChange={handleChange}
                 className="input"
               >
-                <option value="basic">{t('basicPlan')} - $49{t('perMonth')}</option>
-                <option value="full">{t('fullPlan')} - $99{t('perMonth')}</option>
+                <option value="basic">
+                  {t('basicPlan')} -{' '}
+                  {promo
+                    ? promoFill(PROMO_TEXT[language].registerOption, { price: PLANS.basic.price })
+                    : `$${PLANS.basic.price}${t('perMonth')}`}
+                </option>
+                <option value="full">{t('fullPlan')} - ${PLANS.full.price}{t('perMonth')}</option>
               </select>
             </div>
 

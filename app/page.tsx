@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import LogoMark from '@/components/LogoMark';
 import LegalLinks from '@/components/LegalLinks';
 import { useLanguage } from '@/lib/useLanguage';
 import { LANDING_TEXT } from '@/lib/landing-text';
 import { STAGE_IDS, STAGE_TEXT } from '@/lib/stages';
-import { PLANS } from '@/lib/plans';
+import { PLANS, launchPromoActive } from '@/lib/plans';
+import { PROMO_TEXT, promoEndLabel, promoFill } from '@/lib/promo-text';
 import type { Language } from '@/lib/translations';
 
 const LANG_OPTIONS: { value: Language; label: string }[] = [
@@ -29,6 +31,10 @@ export default function Home() {
   const { language, changeLanguage } = useLanguage();
   const L = LANDING_TEXT[language];
   const S = STAGE_TEXT[language];
+  const P = PROMO_TEXT[language];
+  // The page is prerendered at build time, so re-check the promotion date in the browser.
+  const [promo, setPromo] = useState(true);
+  useEffect(() => setPromo(launchPromoActive()), []);
 
   return (
     <div className="app-bg relative isolate min-h-screen overflow-x-hidden text-slate-100">
@@ -71,6 +77,15 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {promo && (
+        <a
+          href="#planes"
+          className="block border-b border-emerald-500/20 bg-emerald-500/10 px-4 py-2.5 text-center text-sm text-emerald-200 hover:bg-emerald-500/15"
+        >
+          🎁 {promoFill(P.banner, { date: promoEndLabel(language) })} <span className="font-semibold text-emerald-300">→</span>
+        </a>
+      )}
 
       <main>
         {/* Hero */}
@@ -204,12 +219,22 @@ export default function Home() {
                       {L.recommended}
                     </span>
                   )}
+                  {promo && plan.id === 'basic' && (
+                    <span className="absolute -top-3 right-6 rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white">
+                      {P.badge}
+                    </span>
+                  )}
                   <h3 className="text-xl font-semibold text-white">{plan.name}</h3>
                   <p className="mt-1 text-sm text-slate-400">{plan.forWho}</p>
                   <p className="mt-6 flex items-baseline gap-1">
                     <span className="text-4xl font-semibold tracking-tight text-white">${plan.price}</span>
                     <span className="text-slate-400">{L.perMonth}</span>
                   </p>
+                  {promo && plan.id === 'basic' && (
+                    <p className="mt-3 text-sm font-medium text-emerald-300">
+                      {promoFill(P.cardNote, { price: plan.price })}
+                    </p>
+                  )}
                   <ul className="mt-6 flex-1 space-y-3">
                     {plan.items.map((item) => (
                       <li key={item} className="flex gap-3 text-sm text-slate-300">

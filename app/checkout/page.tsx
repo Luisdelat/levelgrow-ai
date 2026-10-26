@@ -8,7 +8,8 @@ import { useAuth } from '@/lib/useAuth';
 import { useLanguage } from '@/lib/useLanguage';
 import { APP_TEXT, fill } from '@/lib/app-text';
 import { LANDING_TEXT } from '@/lib/landing-text';
-import { PLANS, type PlanId } from '@/lib/plans';
+import { PLANS, trialApplies, type PlanId } from '@/lib/plans';
+import { PROMO_TEXT, promoEndLabel, promoFill } from '@/lib/promo-text';
 import { authHeaders } from '@/lib/api-client';
 import { LEGAL_UI } from '@/lib/legal';
 
@@ -60,6 +61,7 @@ function Checkout() {
   const { language } = useLanguage();
   const T = APP_TEXT[language];
   const L = LANDING_TEXT[language];
+  const P = PROMO_TEXT[language];
 
   const initialPlan: PlanId = params.get('plan') === 'full' ? 'full' : params.get('plan') === 'basic' ? 'basic' : 'full';
   const [plan, setPlan] = useState<PlanId>(initialPlan);
@@ -69,6 +71,8 @@ function Checkout() {
   const buttonsRef = useRef<HTMLDivElement>(null);
   // Express consent (immediate access, no refunds, waiver of withdrawal) before paying.
   const [consent, setConsent] = useState(false);
+  // Whether the PayPal plan chosen by the server includes the free month.
+  const trialRef = useRef(false);
 
   useEffect(() => {
     fetch('/api/paypal/config', { cache: 'no-store' })
@@ -79,6 +83,9 @@ function Checkout() {
 
   const complimentary = subscription?.status === 'complimentary';
   const currentPlan: PlanId | null = access && user ? (user.plan === 'full' ? 'full' : 'basic') : null;
+  // Launch promotion: shown only to people who have never subscribed through PayPal.
+  const trialFor = (id: PlanId) => !complimentary && trialApplies(id, Boolean(subscription?.hasPayPal));
+  const trial = trialFor(plan);
   const alreadyOnSelected = currentPlan === plan && subscription?.status === 'active';
   const showButtons = Boolean(
     consent && config?.configured && config.clientId && user && !complimentary && !alreadyOnSelected,
@@ -101,7 +108,8 @@ function Checkout() {
             setError('');
             const res = await fetch(`/api/paypal/plan?plan=${plan}`, { headers: authHeaders() });
             if (!res.ok) throw new Error('plan');
-            const { planId } = await res.json();
+            const { planId, trial: withTrial } = (await res.json()) as { planId: string; trial?: boolean };
+            trialRef.current = Boolean(withTrial);
             return actions.subscription.create({ plan_id: planId, custom_id: user.id });
           },
           onApprove: async (data: { subscriptionID?: string }) => {
@@ -122,6 +130,7 @@ function Checkout() {
             // Thank-you page: confirms the payment and shows the first steps.
             const query = new URLSearchParams({ plan: result.plan === 'full' ? 'full' : 'basic' });
             if (result.replaced) query.set('upgrade', '1');
+            if (trialRef.current) query.set('trial', '1');
             router.push(`/dashboard/bienvenida?${query}`);
           },
           onError: (err: unknown) => {
@@ -165,6 +174,11 @@ function Checkout() {
       <header className="rise-in">
         <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">{T.checkoutTitle}</h1>
         <p className="mt-2 max-w-2xl text-slate-400">{T.checkoutSub}</p>
+        {trialFor('basic') && (
+          <p className="mt-4 inline-block rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">
+            🎁 {promoFill(P.banner, { date: promoEndLabel(language) })}
+          </p>
+        )}
       </header>
 
       {access && currentPlan && (
@@ -221,6 +235,12 @@ function Checkout() {
                     <span className="text-3xl font-semibold text-white">${PLANS[p.id].price}</span>
                     <span className="text-slate-400">{L.perMonth}</span>
                   </p>
+                  {trialFor(p.id) && (
+                    <p className="mt-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+                      <span className="font-semibold text-emerald-300">{P.badge}</span> ·{' '}
+                      {promoFill(P.cardNote, { price: PLANS[p.id].price })}
+                    </p>
+                  )}
                   <ul className="mt-4 space-y-2">
                     {p.items.map((item) => (
                       <li key={item} className="flex gap-2 text-sm text-slate-300">
@@ -242,6 +262,11 @@ function Checkout() {
                 {L.perMonth}
               </span>
             </p>
+            {trial && (
+              <p className="text-center text-sm font-medium text-emerald-300">
+                {promoFill(P.today, { price: PLANS[plan].price })}
+              </p>
+            )}
 
             {!config ? (
               <div className="flex justify-center py-6">
@@ -267,6 +292,7 @@ function Checkout() {
                     className="mt-0.5 h-4 w-4 shrink-0 accent-blue-500"
                   />
                   <span>
+                    {trial && <>{promoFill(P.consent, { price: PLANS[plan].price })} </>}
                     {LEGAL_UI[language].checkoutConsent}{' '}
                     <Link href="/legal/terminos" target="_blank" className="text-blue-400 underline">
                       {LEGAL_UI[language].terms}

@@ -4,8 +4,8 @@
 // checkouts record the version they accepted.
 import type { Language } from './translations';
 
-export const LEGAL_VERSION = '2026-10-24';
-export const LEGAL_UPDATED = { es: '24 de octubre de 2026', en: 'October 24, 2026' };
+export const LEGAL_VERSION = '2026-10-26';
+export const LEGAL_UPDATED = { es: '26 de octubre de 2026', en: 'October 26, 2026' };
 export const LEGAL_OPERATOR = 'LEVELGROW LLC';
 export const LEGAL_LOCATION = 'Miami, Florida, USA';
 export const LEGAL_EMAIL = 'soporte@levelgrowai.com';
@@ -51,6 +51,7 @@ const ES: Record<LegalDocId, LegalDoc> = {
         p: [
           'El acceso se ofrece por suscripción mensual (por ejemplo, Plan Básico o Plan Full). Los precios, límites de mensajes y funciones de cada plan se muestran antes de pagar.',
           'Los pagos se procesan por PayPal. La suscripción se renueva automáticamente cada mes y se cobra el mismo importe hasta que la canceles. No guardamos datos de tu tarjeta.',
+          'Mes gratis de lanzamiento: durante la promoción de apertura, quien se suscribe por primera vez al Plan Básico recibe su primer mes gratis. Al suscribirte autorizas a PayPal a guardar tu método de pago y a cobrar automáticamente el precio del Plan Básico al terminar el mes gratis y luego cada mes, hasta que canceles. Si cancelas antes de que termine el mes gratis no se te cobra nada. La promoción es una por persona, no aplica al Plan Full y podemos terminarla o cambiarla para nuevas suscripciones en cualquier momento.',
           'Puedes cancelar en cualquier momento desde tu cuenta de PayPal. La cancelación detiene los cobros futuros y mantienes el acceso hasta el final del periodo ya pagado.',
           'Podemos cambiar precios o planes. Si cambia el precio de tu suscripción activa te avisaremos con antelación razonable, y el cambio se aplicará en una renovación posterior. Los impuestos que correspondan según tu país corren por tu cuenta.',
           'Si un cobro falla, PayPal puede reintentarlo. Si sigue sin poder cobrarse, la suscripción puede suspenderse y se pierde el acceso hasta regularizar el pago.',
@@ -332,6 +333,7 @@ const EN: Record<LegalDocId, LegalDoc> = {
         p: [
           'Access is offered as a monthly subscription (for example, the Basic or Full plan). Prices, message limits and features of each plan are shown before you pay.',
           'Payments are processed by PayPal. Your subscription renews automatically every month and is charged the same amount until you cancel. We do not store your card details.',
+          'Launch free month: during the launch promotion, first-time subscribers to the Basic plan get their first month free. By subscribing you authorize PayPal to store your payment method and to automatically charge the Basic plan price when the free month ends and every month after that, until you cancel. If you cancel before the free month ends, you are not charged. The promotion is limited to one per person, does not apply to the Full plan, and we may end or change it for new subscriptions at any time.',
           'You can cancel at any time from your PayPal account. Cancelling stops future charges and you keep access until the end of the period already paid.',
           'We may change prices or plans. If the price of your active subscription changes we will give you reasonable advance notice, and the change will apply from a later renewal. Any taxes due in your country are your responsibility.',
           'If a charge fails, PayPal may retry it. If it still cannot be collected, the subscription may be suspended and access lost until payment is settled.',

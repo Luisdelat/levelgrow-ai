@@ -7,7 +7,7 @@
 //
 // The PayPal product and the two monthly plans are created automatically the
 // first time they are needed, so no plan IDs have to be configured by hand.
-import { PLANS, type PlanId } from './plans';
+import { LAUNCH_PROMO, PLANS, type PlanId } from './plans';
 
 const PRODUCT_NAME = 'LEVELGROW AI';
 
@@ -63,11 +63,13 @@ async function paypal<T>(path: string, init: { method?: string; body?: unknown }
 }
 
 /** Plan names include the price, so changing a price creates a new plan. */
-function planName(plan: PlanId): string {
-  return `${PRODUCT_NAME} ${plan === 'full' ? 'Full' : 'Basic'} - ${PLANS[plan].price} USD/month`;
+function planName(plan: PlanId, trial: boolean): string {
+  const base = `${PRODUCT_NAME} ${plan === 'full' ? 'Full' : 'Basic'} - ${PLANS[plan].price} USD/month`;
+  return trial ? `${base} - first ${LAUNCH_PROMO.freeMonths} month free` : base;
 }
 
-let planIdCache: Partial<Record<PlanId, string>> = {};
+type PlanKey = `${PlanId}` | `${PlanId}-trial`;
+let planIdCache: Partial<Record<PlanKey, string>> = {};
 
 async function findOrCreateProduct(): Promise<string> {
   const list = await paypal<{ products?: { id: string; name: string }[] }>(
@@ -87,16 +89,21 @@ async function findOrCreateProduct(): Promise<string> {
   return created.id;
 }
 
-/** PayPal plan ID for one of our plans, creating product and plan if needed. */
-export async function getPlanId(plan: PlanId): Promise<string> {
-  const cached = planIdCache[plan];
+/**
+ * PayPal plan ID for one of our plans, creating product and plan if needed.
+ * With `trial`, the plan starts with free month(s); PayPal keeps the buyer's
+ * payment method and charges the regular price automatically afterwards.
+ */
+export async function getPlanId(plan: PlanId, trial = false): Promise<string> {
+  const key: PlanKey = trial ? `${plan}-trial` : plan;
+  const cached = planIdCache[key];
   if (cached) return cached;
 
   const productId = await findOrCreateProduct();
   const list = await paypal<{ plans?: { id: string; name: string; status: string }[] }>(
     `/v1/billing/plans?product_id=${productId}&page_size=20`,
   );
-  const name = planName(plan);
+  const name = planName(plan, trial);
   let id = list.plans?.find((p) => p.name === name && p.status === 'ACTIVE')?.id;
 
   if (!id) {
@@ -107,10 +114,21 @@ export async function getPlanId(plan: PlanId): Promise<string> {
         name,
         status: 'ACTIVE',
         billing_cycles: [
+          // A trial cycle without a price is free.
+          ...(trial
+            ? [
+                {
+                  frequency: { interval_unit: 'MONTH', interval_count: 1 },
+                  tenure_type: 'TRIAL',
+                  sequence: 1,
+                  total_cycles: LAUNCH_PROMO.freeMonths,
+                },
+              ]
+            : []),
           {
             frequency: { interval_unit: 'MONTH', interval_count: 1 },
             tenure_type: 'REGULAR',
-            sequence: 1,
+            sequence: trial ? 2 : 1,
             total_cycles: 0,
             pricing_scheme: { fixed_price: { value: String(PLANS[plan].price), currency_code: 'USD' } },
           },
@@ -125,7 +143,7 @@ export async function getPlanId(plan: PlanId): Promise<string> {
     id = created.id;
   }
 
-  planIdCache = { ...planIdCache, [plan]: id };
+  planIdCache = { ...planIdCache, [key]: id };
   return id;
 }
 
@@ -134,6 +152,8 @@ export async function planForPayPalPlanId(paypalPlanId: string): Promise<PlanId 
   for (const plan of ['basic', 'full'] as PlanId[]) {
     if ((await getPlanId(plan)) === paypalPlanId) return plan;
   }
+  // Launch-promo plan (also after the promotion ends, for people already on it).
+  if ((await getPlanId(LAUNCH_PROMO.plan, true)) === paypalPlanId) return LAUNCH_PROMO.plan;
   return null;
 }
 

@@ -9,6 +9,7 @@ import { useLanguage } from '@/lib/useLanguage';
 import { APP_TEXT, fill } from '@/lib/app-text';
 import { LANDING_TEXT } from '@/lib/landing-text';
 import { PLANS, planOf } from '@/lib/plans';
+import { PROMO_TEXT, promoFill } from '@/lib/promo-text';
 import { STAGE_IDS, STAGE_TEXT, stageHref, type StageId } from '@/lib/stages';
 import { fetchProgress } from '@/lib/api-client';
 
@@ -33,6 +34,7 @@ function Welcome() {
   const plan = planOf(user?.plan ?? params.get('plan'));
   const planName = plan === 'full' ? L.fullName : L.basicName;
   const upgraded = params.get('upgrade') === '1';
+  const trial = params.get('trial') === '1';
   const next: StageId | null = completed ? (STAGE_IDS.find((id) => !completed.includes(id)) ?? null) : 'genoma';
   const started = Boolean(completed && completed.length > 0);
   const nextDate = subscription?.currentPeriodEnd
@@ -67,6 +69,15 @@ function Welcome() {
           {fill(T.welcomeTitle, { plan: planName })}
         </h1>
         <p className="relative mx-auto mt-3 max-w-xl text-slate-400">{T.welcomeSub}</p>
+        {trial && (
+          <p className="relative mx-auto mt-4 max-w-xl rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-200">
+            🎁{' '}
+            {promoFill(PROMO_TEXT[language].welcome, {
+              price: PLANS[plan].price,
+              date: nextDate ?? '—',
+            })}
+          </p>
+        )}
         {upgraded && (
           <p className="relative mx-auto mt-4 max-w-xl rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-2.5 text-sm text-blue-200">
             {fill(T.welcomeUpgraded, { plan: planName })}
